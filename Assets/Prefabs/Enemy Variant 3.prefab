@@ -12,27 +12,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: c4df37558a35e51419d4b19d8fe43290,
+      objectReference: {fileID: 21300000, guid: 498fcf5c7c74f3048a5659743eedb9bb,
         type: 3}
-    - target: {fileID: 1963289330052487255, guid: dae22a222eb903f49bfa1a89fb63e48e,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0.5420078
-      objectReference: {fileID: 0}
-    - target: {fileID: 1963289330052487255, guid: dae22a222eb903f49bfa1a89fb63e48e,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.5420078
-      objectReference: {fileID: 0}
-    - target: {fileID: 1963289330052487255, guid: dae22a222eb903f49bfa1a89fb63e48e,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 0.7924528
-      objectReference: {fileID: 0}
     - target: {fileID: 3325084820311284866, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_Name
-      value: Enemy Variant 2
+      value: Enemy Variant 3
       objectReference: {fileID: 0}
     - target: {fileID: 3325084820311284866, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
@@ -150,7 +135,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.28, y: 1.28}
+    oldSize: {x: 0.75, y: 0.8}
     newSize: {x: 1.28, y: 1.28}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
