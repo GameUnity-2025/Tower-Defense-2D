@@ -11,4 +11,9 @@ public class MennuController : MonoBehaviour
         Debug.Log("Loading Level: Level" + lastLevel); 
         SceneManager.LoadScene("Level" + lastLevel);
     }
+    public void OnSelectLevelButton()
+    {
+        Debug.Log("Loading LevelSelect");
+        SceneManager.LoadScene("LevelSelect");
+    }
 }
