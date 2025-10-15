@@ -78,4 +78,8 @@ public class PlayAgain : MonoBehaviour
         string indexPart = sceneName.Substring (LevelPrefix.Length);
         return int.TryParse (indexPart, out levelIndex);
     }
+    public void BackToMain()
+    {
+        SceneManager.LoadScene("Main");
+    }    
 }
