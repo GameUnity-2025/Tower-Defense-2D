@@ -1,29 +1,82 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PlayAgain : MonoBehaviour
 {
-    //Untuk Play Again
-    public void playAgain()
+    private const string LevelPrefix = "Level";
+    private const string LevelSelectScene = "LevelSelect";
+    private const int MaxLevel = 20;
+
+    public void playAgain ()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Scene currentScene = SceneManager.GetActiveScene ();
+        SceneManager.LoadScene (currentScene.name);
     }
-    //untuk ke level 2
-    public void nextScene()
+
+    public void nextScene ()
     {
-        SceneManager.LoadScene("Level2");
+        if (!TryGetCurrentLevelIndex (out int currentLevel))
+        {
+            SceneManager.LoadScene (LevelSelectScene);
+            return;
+        }
+
+        int nextLevel = currentLevel + 1;
+        if (nextLevel > MaxLevel)
+        {
+            SceneManager.LoadScene (LevelSelectScene);
+            return;
+        }
+
+        LoadLevel (nextLevel);
     }
-    //untuk ke level 3
-    public void level3Scene()
+
+    public void level3Scene ()
     {
-        SceneManager.LoadScene("Level3");
+        SceneManager.LoadScene (LevelSelectScene);
     }
-    //untuk ke level 1
-    public void prevScene()
+
+    public void prevScene ()
     {
-        SceneManager.LoadScene("Level1");
+        if (!TryGetCurrentLevelIndex (out int currentLevel))
+        {
+            SceneManager.LoadScene (LevelSelectScene);
+            return;
+        }
+
+        int previousLevel = currentLevel - 1;
+        if (previousLevel < 1)
+        {
+            SceneManager.LoadScene (LevelSelectScene);
+            return;
+        }
+
+        LoadLevel (previousLevel);
+    }
+
+    private static void LoadLevel (int levelIndex)
+    {
+        string sceneName = $"{LevelPrefix}{levelIndex}";
+        SceneManager.LoadScene (sceneName);
+    }
+
+    private static bool TryGetCurrentLevelIndex (out int levelIndex)
+    {
+        string sceneName = SceneManager.GetActiveScene ().name;
+        return TryParseLevelIndex (sceneName, out levelIndex);
+    }
+
+    private static bool TryParseLevelIndex (string sceneName, out int levelIndex)
+    {
+        levelIndex = 0;
+        if (!sceneName.StartsWith (LevelPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string indexPart = sceneName.Substring (LevelPrefix.Length);
+        return int.TryParse (indexPart, out levelIndex);
     }
     public void BackToMain()
     {
