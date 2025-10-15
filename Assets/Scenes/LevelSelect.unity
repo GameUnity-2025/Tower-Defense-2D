@@ -509,8 +509,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13fd07ee11ba7d044b8aaaa4415dfbd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level1Button: {fileID: 1837859818}
-  level2Button: {fileID: 1804940766}
+  _levelButtonPrefab: {fileID: 1837859818}
+  _buttonContainer: {fileID: 1736032870}
+  _totalLevels: 20
+  _buttonsPerRow: 5
+  _firstButtonPosition: {x: -390, y: 165}
+  _buttonSpacing: {x: 110, y: -60}
+  _lockedTextColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  _unlockedTextColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &716045653
 Transform:
   m_ObjectHideFlags: 0
@@ -710,12 +716,12 @@ GameObject:
   - component: {fileID: 1804940767}
   - component: {fileID: 1804940766}
   m_Layer: 5
-  m_Name: Level2Button
+  m_Name: LegacyLevel2Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1804940766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -832,12 +838,12 @@ GameObject:
   - component: {fileID: 1837859816}
   - component: {fileID: 1837859818}
   m_Layer: 5
-  m_Name: Level1Button
+  m_Name: LevelButtonTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1837859815
 RectTransform:
   m_ObjectHideFlags: 0
