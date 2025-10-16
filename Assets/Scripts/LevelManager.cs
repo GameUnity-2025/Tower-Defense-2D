@@ -231,4 +231,12 @@ public class LevelManager : MonoBehaviour
             PlayerPrefs.Save();
         }
     }
+    public void OnPlaceTowerButtonClicked()
+    {
+        TowerPlacement placement = FindObjectOfType<TowerPlacement>(); // Tìm TowerPlacement gần nhất
+        if (placement != null)
+        {
+            placement.LockTowerPlacement();
+        }
+    }
 }
