@@ -20,8 +20,10 @@ public class InfoController : MonoBehaviour
     [SerializeField] private Sprite tower4Sprite;
     [SerializeField] private Button enemy1Button;
     [SerializeField] private Button enemy2Button;
+    [SerializeField] private Button enemy3Button;
     [SerializeField] private Sprite enemy1Sprite;
     [SerializeField] private Sprite enemy2Sprite;
+    [SerializeField] private Sprite enemy3Sprite;
     [SerializeField] private Button enemyTabButton;
     [SerializeField] private Button towerTabButton; // Nút Tower
 
@@ -38,6 +40,19 @@ public class InfoController : MonoBehaviour
         // Gán sự kiện cho các nút kẻ địch
         enemy1Button.onClick.AddListener(() => ShowEnemyDetails(1));
         enemy2Button.onClick.AddListener(() => ShowEnemyDetails(2));
+
+        // Kiểm tra và log trạng thái của enemy3Button
+        Debug.Log("enemy3Button status: " + (enemy3Button == null ? "NULL" : "NOT NULL"));
+
+        if (enemy3Button != null)
+        {
+            enemy3Button.onClick.AddListener(() => ShowEnemyDetails(3));
+            Debug.Log("Successfully added click listener to enemy3Button");
+        }
+        else
+        {
+            Debug.LogWarning("enemy3Button is not assigned in Inspector!");
+        }
 
         // Gán sự kiện cho nút Enemy và Tower
         enemyTabButton.onClick.AddListener(SwitchToEnemies);
@@ -77,6 +92,10 @@ public class InfoController : MonoBehaviour
         towerDetailPanel.SetActive(false);
         showingTowers = false;
         towerTabButton.gameObject.SetActive(true); // Hiển thị nút Tower khi chuyển sang Enemy
+
+        // Đếm và hiển thị số lượng enemy
+        int enemyCount = CountEnemies();
+        Debug.Log("Chuyển sang tab Enemy. Số lượng enemy: " + enemyCount);
     }
 
     private void SwitchToTowers()
@@ -102,6 +121,7 @@ public class InfoController : MonoBehaviour
                                       "Damage: 10\n" +
                                       "Special Ability: None";
                 break;
+
             case 2:
                 towerDetailImage.sprite = tower2Sprite;
                 towerDetailText.text = "Tower 2: Advanced Tower\n" +
@@ -110,6 +130,7 @@ public class InfoController : MonoBehaviour
                                       "Damage: 20\n" +
                                       "Special Ability: Splash Damage";
                 break;
+
             case 3:
                 towerDetailImage.sprite = tower3Sprite;
                 towerDetailText.text = "Tower 3: Pro Tower\n" +
@@ -118,6 +139,7 @@ public class InfoController : MonoBehaviour
                                       "Damage: 30\n" +
                                       "Special Ability: Slow Enemy";
                 break;
+
             case 4:
                 if (PlayerPrefs.GetInt("UnlockedTower4", 0) == 1)
                 {
@@ -151,14 +173,42 @@ public class InfoController : MonoBehaviour
                                       "Damage: 5\n" +
                                       "Special Ability: None";
                 break;
+
             case 2:
                 towerDetailImage.sprite = enemy2Sprite;
-                towerDetailText.text = "Enemy 2: Advanced Enemy\n" +
+                towerDetailText.text = "Enemy 2: Midder Enemy\n" +
                                       "Health: 100\n" +
                                       "Speed: 0.8s\n" +
                                       "Damage: 10\n" +
                                       "Special Ability: Armor";
                 break;
+
+            case 3:
+                towerDetailImage.sprite = enemy3Sprite;
+                towerDetailText.text = "Enemy 3: Advanced Enemy\n" +
+                                      "Health: 200\n" +
+                                      "Speed: 0.1s\n" +
+                                      "Damage: 16\n" +
+                                      "Special Ability: Armor";
+                break;
         }
+    }
+
+    // Thêm phương thức này vào class InfoController
+    public int CountEnemies()
+    {
+        if (enemyListPanel == null) return 0;
+
+        int count = 0;
+        Button[] buttons = enemyListPanel.GetComponentsInChildren<Button>(true); // true để lấy cả các object bị ẩn
+
+        foreach (Button button in buttons)
+        {
+            if (button == enemy1Button || button == enemy2Button || button == enemy3Button)
+                count++;
+        }
+
+        Debug.Log("Số lượng enemy trong danh sách: " + count);
+        return count;
     }
 }
