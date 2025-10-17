@@ -62,12 +62,12 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        if (IsOver)
+        if (IsOver || Time.timeScale <= 0f) // Ngừng khi game pause hoặc kết thúc
         {
             return;
         }
 
-        _runningSpawnDelay -= Time.unscaledDeltaTime;
+        _runningSpawnDelay -= Time.deltaTime; // Sử dụng Time.deltaTime để đồng bộ với pause
         if (_runningSpawnDelay <= 0f)
         {
             SpawnEnemy();
@@ -231,6 +231,7 @@ public class LevelManager : MonoBehaviour
             PlayerPrefs.Save();
         }
     }
+
     public void OnPlaceTowerButtonClicked()
     {
         TowerPlacement placement = FindObjectOfType<TowerPlacement>(); // Tìm TowerPlacement gần nhất
