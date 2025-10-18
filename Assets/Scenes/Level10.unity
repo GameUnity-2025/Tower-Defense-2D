@@ -1835,7 +1835,7 @@ MonoBehaviour:
   _enemyPrefabs:
   - {fileID: 145525663934751479, guid: 5f3ec187f9d3582459c082af170bdbb8, type: 3}
   - {fileID: -3474007916477151502, guid: 4d92c9b20bb38ce4db3b0fa4991b2f2f, type: 3}
-  - {fileID: 0}
+  - {fileID: 145525663934751479, guid: ca67bdaf57185f6458f1f09139abc7e1, type: 3}
   _enemyPaths:
   - {fileID: 571645714}
   - {fileID: 1338375352}
