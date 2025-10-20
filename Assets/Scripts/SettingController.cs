@@ -7,20 +7,27 @@ public class SettingController : MonoBehaviour
 {
     [SerializeField] private GameObject settingPanel;
     [SerializeField] private Slider musicSlider;
-    [SerializeField] private Slider sfxSlider; // Slider mới cho SFX
+    [SerializeField] private Slider sfxSlider;
     [SerializeField] private AudioMixer musicMixer;
     [SerializeField] private TMPro.TextMeshProUGUI musicText;
-    [SerializeField] private TMPro.TextMeshProUGUI sfxText; // Text mới cho SFX
+    [SerializeField] private TMPro.TextMeshProUGUI sfxText;
+    [SerializeField] private Button speedToggleButton; // Nút duy nhất để thay đổi tốc độ
+    [SerializeField] private TMPro.TextMeshProUGUI speedText; // Text hiển thị tốc độ
+
+    private float[] speedLevels = { 1f, 1.5f, 2f }; // Các mức tốc độ
+    private int currentSpeedIndex = 0; // Chỉ số tốc độ hiện tại, mặc định là 0 (X1)
 
     void Start()
     {
-        if (musicMixer == null || musicSlider == null || sfxSlider == null)
+        if (musicMixer == null || musicSlider == null || sfxSlider == null || speedToggleButton == null)
         {
-            Debug.LogError("musicMixer, musicSlider, hoặc sfxSlider chưa được gán trong Inspector!");
+            Debug.LogError("musicMixer, musicSlider, sfxSlider, hoặc speedToggleButton chưa được gán trong Inspector!");
             return;
         }
 
-        // Khởi tạo âm lượng Music
+        Time.timeScale = speedLevels[currentSpeedIndex]; // Đặt tốc độ mặc định là X1 khi khởi động
+        UpdateSpeedText(); // Cập nhật text tốc độ ban đầu
+
         if (musicMixer.GetFloat("Music", out float musicVolume))
         {
             musicSlider.value = Mathf.Pow(10, musicVolume / 20);
@@ -32,7 +39,6 @@ public class SettingController : MonoBehaviour
             SetMusicVolume(1.0f);
         }
 
-        // Khởi tạo âm lượng SFX
         if (musicMixer.GetFloat("SFX", out float sfxVolume))
         {
             sfxSlider.value = Mathf.Pow(10, sfxVolume / 20);
@@ -45,8 +51,9 @@ public class SettingController : MonoBehaviour
         }
 
         musicSlider.onValueChanged.AddListener(SetMusicVolume);
-        sfxSlider.onValueChanged.AddListener(SetSFXVolume); // Gắn sự kiện cho SFX slider
+        sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         UpdateText();
+        speedToggleButton.onClick.AddListener(ToggleSpeed); // Gắn sự kiện cho nút
     }
 
     public void OpenSetting()
@@ -58,7 +65,7 @@ public class SettingController : MonoBehaviour
         }
         Debug.Log("Mở SettingPanel, trạng thái trước: " + settingPanel.activeSelf);
         settingPanel.SetActive(true);
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // Pause game khi mở setting
         Debug.Log("Trạng thái sau: " + settingPanel.activeSelf);
     }
 
@@ -67,7 +74,7 @@ public class SettingController : MonoBehaviour
         if (settingPanel != null)
         {
             settingPanel.SetActive(false);
-            Time.timeScale = 1f;
+            Time.timeScale = speedLevels[currentSpeedIndex]; // Quay lại tốc độ hiện tại khi đóng
         }
     }
 
@@ -107,5 +114,21 @@ public class SettingController : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Main");
+    }
+
+    public void ToggleSpeed()
+    {
+        currentSpeedIndex = (currentSpeedIndex + 1) % speedLevels.Length; // Vòng lặp: 0 → 1 → 2 → 0
+        Time.timeScale = speedLevels[currentSpeedIndex];
+        UpdateSpeedText();
+        Debug.Log("Tốc độ game đặt thành: " + speedLevels[currentSpeedIndex] + "x");
+    }
+
+    private void UpdateSpeedText()
+    {
+        if (speedText != null)
+        {
+            speedText.text = "X" + speedLevels[currentSpeedIndex].ToString("F1"); // Hiển thị X1, X1.5, X2
+        }
     }
 }
