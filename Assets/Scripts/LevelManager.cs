@@ -44,14 +44,21 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
+    [SerializeField] private TMPro.TextMeshProUGUI _energyInfo; // Text mới để hiển thị năng lượng
 
     private int _currentLives;
     private int _enemyCounter;
+
+    private int _currentEnergy = 300; // Năng lượng khởi đầu
+    [SerializeField] private int _energyIncreasePerSecond = 10; // Tăng năng lượng theo thời gian
+    [SerializeField] private int _energyFromEnemy = 20; // Năng lượng từ giết enemy
+    private float _energyTimer = 0f;
 
     private void Start()
     {
         SetCurrentLives(_maxLives);
         SetTotalEnemy(_totalEnemy);
+        SetEnergy(_currentEnergy); // Cập nhật năng lượng ban đầu
         InstantiateAllTowerUI();
     }
 
@@ -105,6 +112,14 @@ public class LevelManager : MonoBehaviour
             {
                 enemy.MoveToTarget();
             }
+        }
+
+        // Tăng năng lượng theo thời gian
+        _energyTimer += Time.unscaledDeltaTime; // Sử dụng unscaled để tăng ngay cả khi pause
+        if (_energyTimer >= 1f)
+        {
+            AddEnergy(_energyIncreasePerSecond);
+            _energyTimer = 0f;
         }
     }
 
@@ -237,7 +252,55 @@ public class LevelManager : MonoBehaviour
         TowerPlacement placement = FindObjectOfType<TowerPlacement>(); // Tìm TowerPlacement gần nhất
         if (placement != null)
         {
-            placement.LockTowerPlacement();
+            Tower tower = placement.GetPlacedTower(); // Giả sử TowerPlacement có GetPlacedTower()
+            if (tower != null)
+            {
+                Debug.Log($"Trying to place tower. Current Energy: {_currentEnergy}, Tower Energy Cost: {tower.EnergyCost}");
+                if (CanPlaceTower(tower))
+                {
+                    Debug.Log("Enough energy, attempting to lock placement.");
+                    placement.LockTowerPlacement();
+                }
+                else
+                {
+                    Debug.Log("Not enough energy, placement aborted.");
+                }
+            }
+            else
+            {
+                Debug.Log("No tower selected for placement.");
+            }
+        }
+        else
+        {
+            Debug.Log("No TowerPlacement found.");
+        }
+    }
+
+    // Thêm phương thức kiểm tra và quản lý năng lượng
+    public void AddEnergy(int amount)
+    {
+        _currentEnergy += amount;
+        SetEnergy(_currentEnergy);
+    }
+
+    public void SetEnergy(int energy)
+    {
+        _currentEnergy = energy;
+        _energyInfo.text = $"Energy: {_currentEnergy}";
+    }
+
+    public bool CanPlaceTower(Tower tower)
+    {
+        if (_currentEnergy >= tower.EnergyCost)
+        {
+            AddEnergy(-tower.EnergyCost); // Trừ năng lượng
+            return true;
+        }
+        else
+        {
+            Debug.Log("Not enough energy to place tower!");
+            return false;
         }
     }
 }

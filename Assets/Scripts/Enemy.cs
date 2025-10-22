@@ -92,6 +92,7 @@ public class Enemy : MonoBehaviour
             _currentHealth = 0;
             gameObject.SetActive (false);
             AudioPlayer.Instance.PlaySFX ("enemy-die");
+            LevelManager.Instance.AddEnergy(20);
         }
 
         float healthPercentage = (float) _currentHealth / _maxHealth;
