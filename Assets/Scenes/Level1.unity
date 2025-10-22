@@ -900,6 +900,7 @@ MonoBehaviour:
   _livesInfo: {fileID: 589526564}
   _totalEnemyInfo: {fileID: 1591352193}
   _energyInfo: {fileID: 1978043677}
+  _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
 --- !u!212 &436451553
@@ -3914,6 +3915,7 @@ MonoBehaviour:
   _livesInfo: {fileID: 0}
   _totalEnemyInfo: {fileID: 0}
   _energyInfo: {fileID: 0}
+  _initialEnergy: 300
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
 --- !u!114 &1204497857
@@ -5728,7 +5730,7 @@ GameObject:
   - component: {fileID: 1978043678}
   - component: {fileID: 1978043677}
   m_Layer: 5
-  m_Name: EnegyText
+  m_Name: EnergyText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5773,7 +5775,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Enegy:'
+  m_text: 'Energy:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

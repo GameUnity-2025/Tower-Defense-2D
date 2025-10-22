@@ -49,7 +49,8 @@ public class LevelManager : MonoBehaviour
     private int _currentLives;
     private int _enemyCounter;
 
-    private int _currentEnergy = 300; // Năng lượng khởi đầu
+    [SerializeField] private int _initialEnergy = 300; // Năng lượng ban đầu có thể chỉnh trong Inspector
+    private int _currentEnergy; // Năng lượng hiện tại, khởi tạo từ _initialEnergy
     [SerializeField] private int _energyIncreasePerSecond = 10; // Tăng năng lượng theo thời gian
     [SerializeField] private int _energyFromEnemy = 20; // Năng lượng từ giết enemy
     private float _energyTimer = 0f;
@@ -58,6 +59,7 @@ public class LevelManager : MonoBehaviour
     {
         SetCurrentLives(_maxLives);
         SetTotalEnemy(_totalEnemy);
+        _currentEnergy = _initialEnergy; // Khởi tạo năng lượng hiện tại từ giá trị ban đầu
         SetEnergy(_currentEnergy); // Cập nhật năng lượng ban đầu
         InstantiateAllTowerUI();
     }
