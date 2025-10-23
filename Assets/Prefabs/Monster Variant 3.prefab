@@ -17,12 +17,12 @@ PrefabInstance:
     - target: {fileID: 3325084820311284866, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_Name
-      value: Enemy Variant 3
+      value: Monster Variant 3
       objectReference: {fileID: 0}
     - target: {fileID: 5721372215258040628, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: _maxHealth
-      value: 6
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
@@ -31,13 +31,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2289
+      objectReference: {fileID: 0}
+    - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2361
+      objectReference: {fileID: 0}
+    - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
+        type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.009
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.017
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
