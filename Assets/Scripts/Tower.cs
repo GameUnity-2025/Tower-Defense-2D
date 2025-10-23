@@ -17,20 +17,22 @@ public class Tower : MonoBehaviour
     [SerializeField] private float _bulletSplashRadius = 0f;
 
     [SerializeField] private Bullet _bulletPrefab;
+    [SerializeField] private int _energyCost = 50; // Giá năng lượng của tower (thêm mới)
 
     private float _runningShootDelay;
     private Enemy _targetEnemy;
     private Quaternion _targetRotation;
 
+    public int EnergyCost => _energyCost; // Getter để truy cập giá năng lượng từ LevelManager
+
     // Digunakan untuk menyimpan posisi yang akan ditempati selama tower di drag
     public Vector2? PlacePosition { get; private set; }
 
-    // Start is called before the first frame update
+    // Fungsi yang terpanggil sekali khi ada object Rigidbody yang menyentuh area collider
     void Start()
     {
     }
 
-    // Update is called once per frame
     void Update()
     {
     }
@@ -51,7 +53,7 @@ public class Tower : MonoBehaviour
         transform.position = (Vector2)PlacePosition;
     }
 
-    // Mengubah order in layer pada tower yang sedang di drag
+    // Mengubah order in layer pada tower yang đang di drag
     public void ToggleOrderInLayer(bool toFront)
     {
         int orderInLayer = toFront ? 2 : 0;

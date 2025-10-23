@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -88,8 +88,9 @@ public class Enemy : MonoBehaviour
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
-            gameObject.SetActive(false);
-            AudioPlayer.Instance.PlaySFX("enemy-die");
+            gameObject.SetActive (false);
+            AudioPlayer.Instance.PlaySFX ("enemy-die");
+            LevelManager.Instance.AddEnergy(20);
         }
 
         float healthPercentage = (float)_currentHealth / _maxHealth;
