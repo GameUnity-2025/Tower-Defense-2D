@@ -3,23 +3,27 @@ using UnityEngine;
 
 public class Boss : Enemy
 {
-    [SerializeField] private int _bossMaxHealth = 1; // Máu tối đa cao hơn
-
-    //[SerializeField] private float _bossMoveSpeed = 1f; // Tốc độ nhanh hơn
+    [SerializeField] private int _bossMaxHealth = 500; // Máu tối đa cao hơn
     [SerializeField] private GameObject _projectilePrefab; // Prefab đạn của Boss
-
-    [SerializeField] private float _attackRate = 1f; // Tần suất bắn (giây)
-    [SerializeField] private float _projectileSpeed = 1f; // Tốc độ đạn
-
+    [SerializeField] private float _attackRate = 1.5f; // Tần suất bắn (giây)
+    [SerializeField] private float _projectileSpeed = 3f; // Tốc độ đạn
     private float _attackTimer;
 
     protected override void OnEnable()
     {
-        // Gọi OnEnable của Enemy để khởi tạo máu và thanh máu
         _maxHealth = _bossMaxHealth;
-        //_moveSpeed = _bossMoveSpeed;
-        _attackTimer = 0f;
         base.OnEnable();
+
+        // Tự động mở rộng thanh máu theo _maxHealth
+        if (_healthBar != null && _healthFill != null)
+        {
+            float scaleFactor = _maxHealth / 100f;
+            Vector2 baseSize = _healthBar.size;
+            _healthBar.size = new Vector2(baseSize.x * scaleFactor, baseSize.y);
+            _healthFill.size = _healthBar.size;
+        }
+
+        _attackTimer = 0f;
     }
 
     private void Update()
@@ -40,10 +44,11 @@ public class Boss : Enemy
     {
         // Gọi hàm di chuyển của Enemy
         base.MoveToTarget();
-        // Có thể thêm logic đặc biệt, ví dụ: rung lắc nhẹ khi di chuyển
+
+        // Rung lắc nhẹ khi di chuyển (hiệu ứng boss)
         transform.position += new Vector3(
-            Random.Range(-0.05f, 0.05f),
-            Random.Range(-0.05f, 0.05f),
+            Random.Range(-0.1f, 0.1f),
+            Random.Range(-0.1f, 0.1f),
             0f
         ) * Time.deltaTime;
     }
@@ -51,6 +56,7 @@ public class Boss : Enemy
     public override void ReduceEnemyHealth(int damage)
     {
         base.ReduceEnemyHealth(damage);
+
         // Hiệu ứng nhấp nháy thanh máu khi máu dưới 20%
         if (_currentHealth > 0 && _currentHealth <= _maxHealth * 0.2f && _healthFill != null)
         {
@@ -62,15 +68,16 @@ public class Boss : Enemy
     {
         if (_projectilePrefab != null)
         {
-            // Tạo đạn tại vị trí của Boss
             GameObject projectile = Instantiate(_projectilePrefab, transform.position, Quaternion.identity);
-            // Thêm lực để đạn di chuyển (giả sử hướng ngẫu nhiên hoặc hướng về phía trước)
             Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                Vector2 direction = Quaternion.Euler(0, 0, Random.Range(0f, 360f)) * Vector2.right;
+                // Bắn theo 8 hướng (hoặc ngẫu nhiên)
+                float angle = Random.Range(0f, 360f);
+                Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
                 rb.velocity = direction * _projectileSpeed;
             }
+
             if (AudioPlayer.Instance != null)
             {
                 AudioPlayer.Instance.PlaySFX("boss-attack");
@@ -80,14 +87,14 @@ public class Boss : Enemy
 
     private IEnumerator FlashHealthBar()
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 5; i++)
         {
             if (_healthFill != null)
             {
                 _healthFill.enabled = false;
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.15f);
                 _healthFill.enabled = true;
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.15f);
             }
         }
     }
