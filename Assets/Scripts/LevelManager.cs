@@ -137,6 +137,19 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
+        // Guard clauses to prevent IndexOutOfRangeException / invalid access
+        if (_enemyPrefabs == null || _enemyPrefabs.Length == 0)
+        {
+            Debug.LogWarning("LevelManager: _enemyPrefabs is null or empty. Assign enemy prefabs in the Inspector.");
+            return;
+        }
+
+        if (_enemyPaths == null || _enemyPaths.Length < 2)
+        {
+            Debug.LogWarning("LevelManager: _enemyPaths must contain at least 2 Transforms (start and next). Assign enemy path points in the Inspector.");
+            return;
+        }
+
         int randomIndex = Random.Range(0, _enemyPrefabs.Length);
         string enemyIndexString = (randomIndex + 1).ToString();
         GameObject newEnemyObj = _spawnedEnemies.Find(e => !e.gameObject.activeSelf && e.name.Contains(enemyIndexString))?.gameObject;
