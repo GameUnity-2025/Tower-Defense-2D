@@ -9,6 +9,8 @@ public class LevelSelectController : MonoBehaviour
     public Button level1Button;
     public Button level2Button;
     public Button level3Button;
+    public Button level4Button;
+    public Button level5Button;
 
     void Start()
     {
@@ -16,9 +18,13 @@ public class LevelSelectController : MonoBehaviour
         level1Button.onClick.AddListener(() => LoadLevel(1));
         level2Button.onClick.AddListener(() => LoadLevel(2));
         level3Button.onClick.AddListener(() => LoadLevel(3));
+        level3Button.onClick.AddListener(() => LoadLevel(4));
+        level3Button.onClick.AddListener(() => LoadLevel(5));
 
         level2Button.interactable = lastLevel >= 2;
-        level3Button.interactable = lastLevel >= 3; 
+        level3Button.interactable = lastLevel >= 3;
+        level3Button.interactable = lastLevel >= 4;
+        level3Button.interactable = lastLevel >= 5;
     }
 
     void LoadLevel(int level)
