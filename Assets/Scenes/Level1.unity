@@ -894,8 +894,8 @@ MonoBehaviour:
   - {fileID: 1816069801}
   - {fileID: 642662285}
   _spawnDelay: 5
-  _maxLives: 3
-  _totalEnemy: 15
+  _maxLives: 5
+  _totalEnemy: 5
   _panel: {fileID: 876660015}
   _statusInfo: {fileID: 1540418511}
   _livesInfo: {fileID: 589526564}
