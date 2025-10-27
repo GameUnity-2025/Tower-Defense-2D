@@ -9,6 +9,15 @@ public class Boss : Enemy
     [SerializeField] private float _projectileSpeed = 3f; // Tốc độ đạn
     private float _attackTimer;
 
+    private Vector2 _originalHealthBarSize = new Vector2(0.75f, 0.15f);
+
+    private void Awake()
+    {
+        // Ghi nhớ kích thước gốc (hoặc đặt thủ công)
+        if (_healthBar != null)
+            _originalHealthBarSize = _healthBar.size;
+    }
+
     protected override void OnEnable()
     {
         _maxHealth = _bossMaxHealth;
@@ -22,6 +31,12 @@ public class Boss : Enemy
             _healthBar.size = new Vector2(baseSize.x * scaleFactor, baseSize.y);
             _healthFill.size = _healthBar.size;
         }
+
+        // Mỗi lần clone hoặc reset enemy, ép lại size đúng
+        if (_healthBar != null)
+            _healthBar.size = _originalHealthBarSize;
+        if (_healthFill != null)
+            _healthFill.size = _originalHealthBarSize;
 
         _attackTimer = 0f;
     }
