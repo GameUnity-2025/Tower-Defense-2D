@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -14,23 +12,35 @@ public class LevelSelectController : MonoBehaviour
 
     void Start()
     {
-        int lastLevel = PlayerPrefs.GetInt("LastLevel", 1);
+        // LẤY MÀN CAO NHẤT ĐÃ MỞ KHÓA
+        int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
+        Debug.Log($"[LevelSelect] Unlocked up to Level {unlockedLevel}");
+
+        // GÁN SỰ KIỆN
         level1Button.onClick.AddListener(() => LoadLevel(1));
         level2Button.onClick.AddListener(() => LoadLevel(2));
         level3Button.onClick.AddListener(() => LoadLevel(3));
-        level3Button.onClick.AddListener(() => LoadLevel(4));
-        level3Button.onClick.AddListener(() => LoadLevel(5));
+        level4Button.onClick.AddListener(() => LoadLevel(4));
+        level5Button.onClick.AddListener(() => LoadLevel(5));
 
-        level2Button.interactable = lastLevel >= 2;
-        level3Button.interactable = lastLevel >= 3;
-        level3Button.interactable = lastLevel >= 4;
-        level3Button.interactable = lastLevel >= 5;
+        // MỞ KHÓA NÚT THEO UNLOCKEDLEVEL
+        level1Button.interactable = true;
+        level2Button.interactable = unlockedLevel >= 2;
+        level3Button.interactable = unlockedLevel >= 3;
+        level4Button.interactable = unlockedLevel >= 4;
+        level5Button.interactable = unlockedLevel >= 5;
     }
 
     void LoadLevel(int level)
     {
-        Debug.Log("Loading Level: Level" + level);
-        SceneManager.LoadScene("Level" + level);
-        PlayerPrefs.SetInt("LastLevel", level);
+        string sceneName = "Level" + level;
+        if (System.IO.File.Exists(Application.dataPath + "/Scenes/" + sceneName + ".unity"))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogError("Scene not found: " + sceneName);
+        }
     }
 }

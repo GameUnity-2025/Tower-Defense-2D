@@ -296,4 +296,8 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Not enough energy!");
         return false;
     }
+    public void RegisterSpawnedTowerRemoval(Tower tower)
+    {
+        _spawnedTowers.Remove(tower);
+    }
 }
