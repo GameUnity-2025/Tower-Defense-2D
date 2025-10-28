@@ -23,32 +23,27 @@ public class LevelManager : MonoBehaviour
     private List<Tower> _spawnedTowers = new List<Tower>();
 
     /* ---------- ENEMIES ---------- */
-    [SerializeField] private Enemy[] _enemyPrefabs;   // CHỈ QUÁI THƯỜNG
+    [SerializeField] private Enemy[] _enemyPrefabs;
     [SerializeField] private Transform[] _enemyPaths;
     [SerializeField] private float _spawnDelay = 5f;
-
-    [SerializeField] private Boss _bossPrefab;       // KÉO BOSS PREFAB VÀO ĐÂY
+    [SerializeField] private Boss _bossPrefab;
     private bool _hasBossSpawned = false;
-    private bool _bossRequired = false;              // true nếu đang ở màn 5
-
+    private bool _bossRequired = false;
     private List<Enemy> _spawnedEnemies = new List<Enemy>();
     private float _runningSpawnDelay;
     private List<Bullet> _spawnedBullets = new List<Bullet>();
 
     /* ---------- GAME STATE ---------- */
     public bool IsOver { get; private set; }
-
     [SerializeField] private int _maxLives = 3;
     [SerializeField] private int _totalEnemy = 15;
-
     [SerializeField] private GameObject _panel;
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
-
     private int _currentLives;
-    private int _enemyCounter;                       // còn bao nhiêu quái THƯỜNG phải spawn
+    private int _enemyCounter;
 
     /* ---------- ENERGY ---------- */
     [SerializeField] private int _initialEnergy = 300;
@@ -65,10 +60,7 @@ public class LevelManager : MonoBehaviour
         _currentEnergy = _initialEnergy;
         SetEnergy(_currentEnergy);
         InstantiateAllTowerUI();
-
         _runningSpawnDelay = _spawnDelay;
-
-        // Xác định có cần Boss không
         _bossRequired = IsBossLevel();
     }
 
@@ -76,7 +68,6 @@ public class LevelManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
         if (IsOver || Time.timeScale <= 0f) return;
 
         /* ---- SPAWN QUÁI THƯỜNG ---- */
@@ -90,13 +81,6 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        /* ---- SPAWN BOSS KHI ĐỦ ĐIỀU KIỆN ---- */
-        if (!_hasBossSpawned && _bossRequired && _enemyCounter <= 0 && NoNormalEnemiesActive())
-        {
-            SpawnBoss();
-            _hasBossSpawned = true;
-        }
-
         /* ---- TOWERS ---- */
         foreach (Tower t in _spawnedTowers)
         {
@@ -105,11 +89,10 @@ public class LevelManager : MonoBehaviour
             t.ShootTarget();
         }
 
-        /* ---- ENEMIES (cả thường + Boss) ---- */
+        /* ---- ENEMIES ---- */
         foreach (Enemy e in _spawnedEnemies)
         {
             if (!e.gameObject.activeSelf) continue;
-
             if (Vector2.Distance(e.transform.position, e.TargetPosition) < 0.1f)
             {
                 e.SetCurrentPathIndex(e.CurrentPathIndex + 1);
@@ -140,16 +123,12 @@ public class LevelManager : MonoBehaviour
     private void SpawnNormalEnemy()
     {
         SetTotalEnemy(--_enemyCounter);
-
         int idx = Random.Range(0, _enemyPrefabs.Length);
         string nameKey = (idx + 1).ToString();
-
         GameObject obj = _spawnedEnemies.Find(e => !e.gameObject.activeSelf && e.name.Contains(nameKey))?.gameObject;
         if (obj == null) obj = Instantiate(_enemyPrefabs[idx].gameObject);
-
         Enemy enemy = obj.GetComponent<Enemy>();
         if (!_spawnedEnemies.Contains(enemy)) _spawnedEnemies.Add(enemy);
-
         enemy.transform.position = _enemyPaths[0].position;
         enemy.SetTargetPosition(_enemyPaths[1].position);
         enemy.SetCurrentPathIndex(1);
@@ -158,44 +137,61 @@ public class LevelManager : MonoBehaviour
 
     private bool IsBossLevel() => SceneManager.GetActiveScene().buildIndex == 5;
 
-    private bool NoNormalEnemiesActive()
-    {
-        foreach (Enemy e in _spawnedEnemies)
-            if (e.gameObject.activeSelf && !(e is Boss))
-                return false;
-        return true;
-    }
-
     private void SpawnBoss()
     {
         if (_bossPrefab == null) { Debug.LogError("Boss Prefab missing!"); return; }
-
         GameObject go = Instantiate(_bossPrefab.gameObject);
         Enemy boss = go.GetComponent<Enemy>();
         if (!_spawnedEnemies.Contains(boss)) _spawnedEnemies.Add(boss);
-
         boss.transform.position = _enemyPaths[0].position;
         boss.SetTargetPosition(_enemyPaths[1].position);
         boss.SetCurrentPathIndex(1);
         boss.gameObject.SetActive(true);
+        _hasBossSpawned = true;
 
-        Debug.Log("BOSS SPAWNED!");
-        // AudioPlayer.Instance?.PlaySFX("boss-appear");
+        // HIỆN THÔNG BÁO BOSS
+        if (_statusInfo != null)
+        {
+            _statusInfo.text = "BOSS APPEARED!";
+            Invoke("ClearBossMessage", 2f);
+        }
+    }
+
+    private void ClearBossMessage()
+    {
+        if (!IsOver) _statusInfo.text = "";
     }
 
     /* ============================================================= */
-    /***  CHỈ GỌI TỪ Enemy.ReduceEnemyHealth()  ***/
+    // GỌI TỪ Enemy.ReduceEnemyHealth() HOẶC KHI CHẾT
     public void CheckWinCondition()
     {
-        // 1. Đã spawn hết quái thường
-        // 2. Không còn Enemy nào đang active
-        // 3. Nếu màn cần Boss → Boss phải đã được spawn
-        bool noEnemies = _spawnedEnemies.Find(e => e.gameObject.activeSelf) == null;
+        if (_enemyCounter > 0) return; // Chưa spawn hết quái
 
-        if (_enemyCounter <= 0 && noEnemies &&
-            (!_bossRequired || _hasBossSpawned))
+        bool hasActiveEnemy = false;
+        bool hasActiveBoss = false;
+
+        foreach (Enemy e in _spawnedEnemies)
+        {
+            if (e.gameObject.activeSelf)
+            {
+                hasActiveEnemy = true;
+                if (e is Boss) hasActiveBoss = true;
+            }
+        }
+
+        // THẮNG: Không còn enemy nào sống + (nếu cần Boss thì đã spawn)
+        if (!hasActiveEnemy && (!_bossRequired || _hasBossSpawned))
         {
             SetGameOver(true);
+            return;
+        }
+
+        // SPAWN BOSS: Đã diệt hết quái thường + chưa spawn boss
+        if (_bossRequired && !hasActiveBoss && !_hasBossSpawned && !hasActiveEnemy)
+        {
+            SpawnBoss();
+            _hasBossSpawned = true;
         }
     }
 
@@ -212,6 +208,7 @@ public class LevelManager : MonoBehaviour
     }
 
     public void RegisterSpawnedTower(Tower t) => _spawnedTowers.Add(t);
+    public void RegisterSpawnedTowerRemoval(Tower tower) => _spawnedTowers.Remove(tower);
 
     private void OnDrawGizmos()
     {
@@ -226,7 +223,6 @@ public class LevelManager : MonoBehaviour
     {
         GameObject obj = _spawnedBullets.Find(b => !b.gameObject.activeSelf && b.name.Contains(prefab.name))?.gameObject;
         if (obj == null) obj = Instantiate(prefab.gameObject);
-
         Bullet b = obj.GetComponent<Bullet>();
         if (!_spawnedBullets.Contains(b)) _spawnedBullets.Add(b);
         return b;
@@ -265,10 +261,16 @@ public class LevelManager : MonoBehaviour
 
         if (win)
         {
-            int cur = SceneManager.GetActiveScene().buildIndex;
-            int next = Mathf.Min(cur + 1, SceneManager.sceneCountInBuildSettings - 1);
-            PlayerPrefs.SetInt("LastLevel", next);
-            PlayerPrefs.Save();
+            int currentLevel = SceneManager.GetActiveScene().buildIndex;
+            int nextLevel = currentLevel + 1;
+            int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
+
+            if (nextLevel > unlockedLevel)
+            {
+                PlayerPrefs.SetInt("LastLevel", nextLevel);
+                PlayerPrefs.Save();
+                Debug.Log($"[LevelManager] Unlocked Level {nextLevel}");
+            }
         }
     }
 
@@ -295,9 +297,5 @@ public class LevelManager : MonoBehaviour
         }
         Debug.Log("Not enough energy!");
         return false;
-    }
-    public void RegisterSpawnedTowerRemoval(Tower tower)
-    {
-        _spawnedTowers.Remove(tower);
     }
 }
