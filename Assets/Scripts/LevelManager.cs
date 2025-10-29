@@ -51,6 +51,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _energyIncreasePerSecond = 10;
     [SerializeField] private int _energyFromEnemy = 20;
     private float _energyTimer = 0f;
+    public int GetCurrentEnergy() => _currentEnergy;
 
     /* ============================================================= */
     private void Start()
