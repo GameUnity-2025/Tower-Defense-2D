@@ -101,6 +101,8 @@ public class Tower : MonoBehaviour
             _isPlaced = true;
             PlacePosition = null;
             gameObject.name = gameObject.name.Replace("(Clone)", "").Trim();
+
+            LevelManager.Instance?.AddEnergy(-EnergyCost);
         }
     }
 

@@ -51,6 +51,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _energyIncreasePerSecond = 10;
     [SerializeField] private int _energyFromEnemy = 20;
     private float _energyTimer = 0f;
+
     public int GetCurrentEnergy() => _currentEnergy;
 
     /* ============================================================= */
@@ -150,7 +151,6 @@ public class LevelManager : MonoBehaviour
         boss.gameObject.SetActive(true);
         _hasBossSpawned = true;
 
-        // HIỆN THÔNG BÁO BOSS
         if (_statusInfo != null)
         {
             _statusInfo.text = "BOSS APPEARED!";
@@ -164,10 +164,9 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
-    // GỌI TỪ Enemy.ReduceEnemyHealth() HOẶC KHI CHẾT
     public void CheckWinCondition()
     {
-        if (_enemyCounter > 0) return; // Chưa spawn hết quái
+        if (_enemyCounter > 0) return;
 
         bool hasActiveEnemy = false;
         bool hasActiveBoss = false;
@@ -181,14 +180,12 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // THẮNG: Không còn enemy nào sống + (nếu cần Boss thì đã spawn)
         if (!hasActiveEnemy && (!_bossRequired || _hasBossSpawned))
         {
             SetGameOver(true);
             return;
         }
 
-        // SPAWN BOSS: Đã diệt hết quái thường + chưa spawn boss
         if (_bossRequired && !hasActiveBoss && !_hasBossSpawned && !hasActiveEnemy)
         {
             SpawnBoss();
@@ -245,27 +242,30 @@ public class LevelManager : MonoBehaviour
     public void SetCurrentLives(int v)
     {
         _currentLives = Mathf.Max(v, 0);
-        _livesInfo.text = $"Lives: {_currentLives}";
+        if (_livesInfo != null)
+            _livesInfo.text = $"Lives: {_currentLives}";
     }
 
     public void SetTotalEnemy(int v)
     {
         _enemyCounter = v;
-        _totalEnemyInfo.text = $"Total Enemy: {Mathf.Max(_enemyCounter, 0)}";
+        if (_totalEnemyInfo != null)
+            _totalEnemyInfo.text = $"Total Enemy: {Mathf.Max(_enemyCounter, 0)}";
     }
 
     public void SetGameOver(bool win)
     {
         IsOver = true;
-        _statusInfo.text = win ? "You Win!" : "You Lose!";
-        _panel.SetActive(true);
+        if (_statusInfo != null)
+            _statusInfo.text = win ? "You Win!" : "You Lose!";
+        if (_panel != null)
+            _panel.SetActive(true);
 
         if (win)
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
             int nextLevel = currentLevel + 1;
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
-
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
@@ -281,22 +281,38 @@ public class LevelManager : MonoBehaviour
         if (p != null)
         {
             Tower t = p.GetPlacedTower();
-            if (t != null && CanPlaceTower(t))
-                p.LockTowerPlacement();
+            if (t != null && CanPlaceTower(t)) // CHỈ KIỂM TRA
+            {
+                p.LockTowerPlacement(); // TRỪ Ở TOWER
+            }
         }
     }
 
-    public void AddEnergy(int v) { _currentEnergy += v; SetEnergy(_currentEnergy); }
-    public void SetEnergy(int v) { _currentEnergy = v; _energyInfo.text = $"Energy: {_currentEnergy}"; }
+    public void AddEnergy(int v)
+    {
+        _currentEnergy += v;
+        SetEnergy(_currentEnergy);
+    }
 
+    public void SetEnergy(int v)
+    {
+        _currentEnergy = v;
+
+        if (_energyInfo == null)
+        {
+            GameObject obj = GameObject.Find("EnergyText");
+            if (obj != null)
+                _energyInfo = obj.GetComponent<TMPro.TextMeshProUGUI>();
+        }
+
+        if (_energyInfo != null)
+            _energyInfo.text = $"Energy: {_currentEnergy}";
+    }
+
+    // CHỈ KIỂM TRA, KHÔNG TRỪ
     public bool CanPlaceTower(Tower t)
     {
-        if (_currentEnergy >= t.EnergyCost)
-        {
-            AddEnergy(-t.EnergyCost);
-            return true;
-        }
-        Debug.Log("Not enough energy!");
-        return false;
+        if (t == null) return false;
+        return _currentEnergy >= t.EnergyCost;
     }
 }

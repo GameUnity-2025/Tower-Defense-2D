@@ -3829,7 +3829,6 @@ GameObject:
   - component: {fileID: 1204497855}
   - component: {fileID: 1204497854}
   - component: {fileID: 1204497853}
-  - component: {fileID: 1204497856}
   - component: {fileID: 1204497857}
   - component: {fileID: 1204497858}
   - component: {fileID: 1204497859}
@@ -3890,36 +3889,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1204497856
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1204497852}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b216cc8171431f428d80abf554661ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _towerUIParent: {fileID: 0}
-  _towerUIPrefab: {fileID: 0}
-  _towerPrefabs: []
-  _enemyPrefabs:
-  - {fileID: 145525663934751479, guid: d1289116737dad440b0a7a62003405d6, type: 3}
-  _enemyPaths: []
-  _spawnDelay: 5
-  _bossPrefab: {fileID: 0}
-  _maxLives: 3
-  _totalEnemy: 15
-  _panel: {fileID: 0}
-  _statusInfo: {fileID: 0}
-  _livesInfo: {fileID: 0}
-  _totalEnemyInfo: {fileID: 0}
-  _energyInfo: {fileID: 0}
-  _initialEnergy: 300
-  _energyIncreasePerSecond: 10
-  _energyFromEnemy: 20
 --- !u!114 &1204497857
 MonoBehaviour:
   m_ObjectHideFlags: 0
