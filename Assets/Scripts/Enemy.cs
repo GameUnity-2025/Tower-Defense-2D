@@ -22,7 +22,7 @@ public class Enemy : MonoBehaviour
 
     public virtual void MoveToTarget()
     {
-        transform.position = Vector3.MoveTowards(transform.position, TargetPosition, _moveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, TargetPosition, _moveSpeed * Time.unscaledDeltaTime);
     }
 
     public void SetTargetPosition(Vector3 targetPosition)

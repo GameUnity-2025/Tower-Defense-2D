@@ -57,10 +57,10 @@ public class Boss : Enemy
 
     public override void MoveToTarget()
     {
-        // Gọi hàm di chuyển của Enemy
+        // Di chuyển cơ bản
         base.MoveToTarget();
 
-        // Rung lắc nhẹ khi di chuyển (hiệu ứng boss)
+        // Hiệu ứng rung lắc
         transform.position += new Vector3(
             Random.Range(-0.1f, 0.1f),
             Random.Range(-0.1f, 0.1f),

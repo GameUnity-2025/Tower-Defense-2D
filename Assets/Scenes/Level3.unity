@@ -853,8 +853,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1830421876}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: playAgain
+        m_TargetAssemblyTypeName: PlayAgain, Assembly-CSharp
+        m_MethodName: PlayAgainFuntion
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2075,7 +2075,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1400144633}
         m_TargetAssemblyTypeName: SettingController, Assembly-CSharp
         m_MethodName: BackToMenu
         m_Mode: 1
@@ -2799,7 +2799,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '< Previous Level '
+  m_Text: Next Level >
 --- !u!222 &899048774
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4655,6 +4655,7 @@ MonoBehaviour:
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
+  _shootDelayReducePerSpeedLevel: 0.15
 --- !u!212 &1547409512
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -6239,7 +6240,7 @@ GameObject:
   - component: {fileID: 1876264271}
   - component: {fileID: 1876264270}
   m_Layer: 5
-  m_Name: PrevScene
+  m_Name: NextScene
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6310,8 +6311,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1830421876}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: prevScene
+        m_TargetAssemblyTypeName: PlayAgain, Assembly-CSharp
+        m_MethodName: NextLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

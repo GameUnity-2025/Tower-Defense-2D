@@ -19,11 +19,7 @@ public class SettingController : MonoBehaviour
 
     void Start()
     {
-        if (musicMixer == null || musicSlider == null || sfxSlider == null || speedToggleButton == null)
-        {
-            Debug.LogError("musicMixer, musicSlider, sfxSlider, hoặc speedToggleButton chưa được gán trong Inspector!");
-            return;
-        }
+
 
         Time.timeScale = speedLevels[currentSpeedIndex]; // Đặt tốc độ mặc định là X1 khi khởi động
         UpdateSpeedText(); // Cập nhật text tốc độ ban đầu

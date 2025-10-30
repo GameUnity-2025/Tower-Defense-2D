@@ -1171,6 +1171,7 @@ MonoBehaviour:
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
+  _shootDelayReducePerSpeedLevel: 0.15
 --- !u!212 &436451553
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2527,8 +2528,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1204497858}
-        m_TargetAssemblyTypeName: SettingController, Assembly-CSharp
+      - m_Target: {fileID: 1204497857}
+        m_TargetAssemblyTypeName: BackToMenuController, Assembly-CSharp
         m_MethodName: BackToMenu
         m_Mode: 1
         m_Arguments:
@@ -3286,8 +3287,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 291683691}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: playAgain
+        m_TargetAssemblyTypeName: PlayAgain, Assembly-CSharp
+        m_MethodName: PlayAgainFuntion
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5406,9 +5407,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 291683689}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 291683691}
+        m_TargetAssemblyTypeName: PlayAgain, Assembly-CSharp
+        m_MethodName: NextLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
