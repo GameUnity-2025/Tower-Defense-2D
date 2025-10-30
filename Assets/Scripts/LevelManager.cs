@@ -79,10 +79,10 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         if (IsOver || Time.timeScale <= 0f) return;
 
-        /* ---- SPAWN QUÁI THƯỜNG ---- */
+        // SPAWN
         if (_enemyCounter > 0)
         {
-            _runningSpawnDelay -= Time.unscaledDeltaTime; // DÙNG unscaledDeltaTime
+            _runningSpawnDelay -= Time.deltaTime;
             if (_runningSpawnDelay <= 0f)
             {
                 SpawnNormalEnemy();
@@ -90,15 +90,15 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        /* ---- TOWERS ---- */
+        // TOWERS
         foreach (Tower t in _spawnedTowers)
         {
             t.CheckNearestEnemy(_spawnedEnemies);
             t.SeekTarget();
-            t.ShootTarget(); // DÙNG unscaledDeltaTime TRONG Tower
+            t.ShootTarget();
         }
 
-        /* ---- ENEMIES ---- */
+        // ENEMIES
         foreach (Enemy e in _spawnedEnemies)
         {
             if (!e.gameObject.activeSelf) continue;
@@ -115,12 +115,12 @@ public class LevelManager : MonoBehaviour
             }
             else
             {
-                e.MoveToTarget(); // DÙNG unscaledDeltaTime
+                e.MoveToTarget();
             }
         }
 
-        /* ---- ENERGY ---- */
-        _energyTimer += Time.unscaledDeltaTime;
+        // ENERGY
+        _energyTimer += Time.deltaTime;
         if (_energyTimer >= 1f)
         {
             AddEnergy(_energyIncreasePerSecond);

@@ -172,7 +172,7 @@ public class Tower : MonoBehaviour
     {
         if (_targetEnemy == null || !_isPlaced || _bulletPrefab == null) return;
 
-        _runningShootDelay -= Time.unscaledDeltaTime; // DÙNG unscaled
+        _runningShootDelay -= Time.deltaTime;
         if (_runningShootDelay > 0f) return;
         if (Quaternion.Angle(_towerHead.transform.rotation, _targetRotation) > 10f) return;
 
