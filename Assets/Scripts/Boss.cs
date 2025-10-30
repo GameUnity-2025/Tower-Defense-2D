@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using UnityEngine;
 
 public class Boss : Enemy
@@ -8,6 +9,14 @@ public class Boss : Enemy
     [SerializeField] private float _attackRate = 1.5f; // Tần suất bắn (giây)
     [SerializeField] private float _projectileSpeed = 3f; // Tốc độ đạn
     private float _attackTimer;
+
+    // --- Shield fields ---
+    [Header("Shield")]
+    [SerializeField] private bool _startWithShield = true;            // nếu true thì tự bật khi spawn
+
+    [SerializeField] private int _shieldDefaultHP = 200;              // lượng shield mặc định
+    [SerializeField] private float _shieldDefaultDuration = 8f;      // thời gian tồn tại của shield
+    [SerializeField] private Shield _shieldComponent; // mới: tham chiếu đến Shield component
 
     private Vector2 _originalHealthBarSize = new Vector2(0.75f, 0.15f);
 
@@ -39,6 +48,8 @@ public class Boss : Enemy
             _healthFill.size = _originalHealthBarSize;
 
         _attackTimer = 0f;
+        if (_startWithShield && _shieldComponent != null)
+            _shieldComponent.Activate(_shieldDefaultHP, _shieldDefaultDuration);
     }
 
     private void Update()
@@ -70,6 +81,20 @@ public class Boss : Enemy
 
     public override void ReduceEnemyHealth(int damage)
     {
+        if (_shieldComponent != null && _shieldComponent.IsActive)
+        {
+            int leftover = _shieldComponent.AbsorbDamage(damage);
+            if (leftover > 0)
+            {
+                base.ReduceEnemyHealth(leftover);
+            }
+            else
+            {
+                // shield đã ăn hết damage → không gọi base
+            }
+            return;
+        }
+
         base.ReduceEnemyHealth(damage);
 
         // Hiệu ứng nhấp nháy thanh máu khi máu dưới 20%

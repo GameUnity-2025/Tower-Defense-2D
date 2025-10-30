@@ -4137,8 +4137,8 @@ MonoBehaviour:
   - {fileID: 2117327081848257266, guid: 5be1821dcf4000d459334894d06efc90, type: 3}
   - {fileID: 2117327081848257266, guid: b1db1313b3f97e143ba20e2873f8d471, type: 3}
   _enemyPrefabs:
-  - {fileID: 145525663934751479, guid: 5f3ec187f9d3582459c082af170bdbb8, type: 3}
-  - {fileID: 145525663934751479, guid: ca67bdaf57185f6458f1f09139abc7e1, type: 3}
+  - {fileID: 145525663934751479, guid: f3ad8e0e3e0c44749ba84e9e816dd283, type: 3}
+  - {fileID: -97806411721327321, guid: 3fa0c85695ec0164cb4ab43a907516af, type: 3}
   _enemyPaths:
   - {fileID: 571645714}
   - {fileID: 1338375352}
@@ -4154,7 +4154,8 @@ MonoBehaviour:
   - {fileID: 1896107178}
   - {fileID: 2091952272}
   _spawnDelay: 5
-  _bossPrefab: {fileID: 0}
+  _bossPrefab: {fileID: -97806411721327321, guid: 3fa0c85695ec0164cb4ab43a907516af,
+    type: 3}
   _maxLives: 5
   _totalEnemy: 12
   _panel: {fileID: 1047872024}

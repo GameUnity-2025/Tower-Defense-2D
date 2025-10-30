@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class LevelManager : MonoBehaviour
 {
     private static LevelManager _instance = null;
+
     public static LevelManager Instance
     {
         get
@@ -58,6 +59,7 @@ public class LevelManager : MonoBehaviour
     private float _energyTimer = 0f;
 
     /* ============================================================= */
+
     private void Start()
     {
         SetCurrentLives(_maxLives);
@@ -137,6 +139,7 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
+
     private void SpawnNormalEnemy()
     {
         SetTotalEnemy(--_enemyCounter);
@@ -171,13 +174,21 @@ public class LevelManager : MonoBehaviour
         if (_bossPrefab == null) { Debug.LogError("Boss Prefab missing!"); return; }
 
         GameObject go = Instantiate(_bossPrefab.gameObject);
-        Enemy boss = go.GetComponent<Enemy>();
+        Boss boss = go.GetComponent<Boss>();
+        if (boss == null)
+        {
+            Debug.LogError("Spawned object does not have a Boss component.");
+            Destroy(go);
+            return;
+        }
+
         if (!_spawnedEnemies.Contains(boss)) _spawnedEnemies.Add(boss);
 
         boss.transform.position = _enemyPaths[0].position;
         boss.SetTargetPosition(_enemyPaths[1].position);
         boss.SetCurrentPathIndex(1);
         boss.gameObject.SetActive(true);
+        //boss.ActivateShield();
 
         Debug.Log("BOSS SPAWNED!");
         // AudioPlayer.Instance?.PlaySFX("boss-appear");
@@ -185,6 +196,7 @@ public class LevelManager : MonoBehaviour
 
     /* ============================================================= */
     /***  CHỈ GỌI TỪ Enemy.ReduceEnemyHealth()  ***/
+
     public void CheckWinCondition()
     {
         // 1. Đã spawn hết quái thường
@@ -200,6 +212,7 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
+
     private void InstantiateAllTowerUI()
     {
         foreach (Tower t in _towerPrefabs)
@@ -283,8 +296,23 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void AddEnergy(int v) { _currentEnergy += v; SetEnergy(_currentEnergy); }
-    public void SetEnergy(int v) { _currentEnergy = v; _energyInfo.text = $"Energy: {_currentEnergy}"; }
+    public void AddEnergy(int v)
+    {
+        _currentEnergy += v; SetEnergy(_currentEnergy);
+    }
+
+    public void SetEnergy(int v)
+    {
+        _currentEnergy = v; _energyInfo.text = $"Energy: {_currentEnergy}";
+        if (_energyInfo != null)
+        {
+            _energyInfo.text = $"Energy: {_currentEnergy}";
+        }
+        else
+        {
+            Debug.LogWarning("LevelManager: _energyInfo chưa được gán trong Inspector hoặc đã bị hủy tại runtime.");
+        }
+    }
 
     public bool CanPlaceTower(Tower t)
     {
@@ -296,6 +324,7 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Not enough energy!");
         return false;
     }
+
     public void RegisterSpawnedTowerRemoval(Tower tower)
     {
         _spawnedTowers.Remove(tower);

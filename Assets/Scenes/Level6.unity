@@ -892,7 +892,8 @@ MonoBehaviour:
   - {fileID: 1816069801}
   - {fileID: 642662285}
   _spawnDelay: 5
-  _bossPrefab: {fileID: 0}
+  _bossPrefab: {fileID: -97806411721327321, guid: 3fa0c85695ec0164cb4ab43a907516af,
+    type: 3}
   _maxLives: 5
   _totalEnemy: 5
   _panel: {fileID: 876660015}
