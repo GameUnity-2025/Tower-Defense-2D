@@ -38,11 +38,12 @@ public class LevelManager : MonoBehaviour
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3;
     [SerializeField] private int _totalEnemy = 15;
-    [SerializeField] private GameObject _panel;
+    [SerializeField] private GameObject _panel; // PANEL WIN/LOSE
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
+
     private int _currentLives;
     private int _enemyCounter;
 
@@ -52,6 +53,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _energyIncreasePerSecond = 10;
     [SerializeField] private int _energyFromEnemy = 20;
     private float _energyTimer = 0f;
+
+    // TĂNG TỐC ĐỘ BẮN TOWER KHI TĂNG TỐC GAME
+    [SerializeField] private float _shootDelayReducePerSpeedLevel = 0.15f;
 
     public int GetCurrentEnergy() => _currentEnergy;
 
@@ -66,6 +70,9 @@ public class LevelManager : MonoBehaviour
         InstantiateAllTowerUI();
         _runningSpawnDelay = _spawnDelay;
         _bossRequired = IsBossLevel();
+
+        // ẨN PANEL BAN ĐẦU
+        if (_panel != null) _panel.SetActive(false);
     }
 
     private void Update()
@@ -74,7 +81,7 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         if (IsOver || Time.timeScale <= 0f) return;
 
-        /* ---- SPAWN QUÁI THƯỜNG ---- */
+        // SPAWN
         if (_enemyCounter > 0)
         {
             _runningSpawnDelay -= Time.deltaTime;
@@ -85,7 +92,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        /* ---- TOWERS ---- */
+        // TOWERS
         foreach (Tower t in _spawnedTowers)
         {
             t.CheckNearestEnemy(_spawnedEnemies);
@@ -93,7 +100,7 @@ public class LevelManager : MonoBehaviour
             t.ShootTarget();
         }
 
-        /* ---- ENEMIES ---- */
+        // ENEMIES
         foreach (Enemy e in _spawnedEnemies)
         {
             if (!e.gameObject.activeSelf) continue;
@@ -114,8 +121,8 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        /* ---- ENERGY ---- */
-        _energyTimer += Time.unscaledDeltaTime;
+        // ENERGY
+        _energyTimer += Time.deltaTime;
         if (_energyTimer >= 1f)
         {
             AddEnergy(_energyIncreasePerSecond);
@@ -164,7 +171,6 @@ public class LevelManager : MonoBehaviour
 
         _hasBossSpawned = true;
 
-        // HIỆN THÔNG BÁO BOSS
         if (_statusInfo != null)
         {
             _statusInfo.text = "BOSS APPEARED!";
@@ -179,11 +185,9 @@ public class LevelManager : MonoBehaviour
 
     /* ============================================================= */
 
-    // GỌI TỪ Enemy.ReduceEnemyHealth() HOẶC KHI CHẾT
-
     public void CheckWinCondition()
     {
-        if (_enemyCounter > 0) return; // Chưa spawn hết quái
+        if (_enemyCounter > 0) return;
 
         bool hasActiveEnemy = false;
         bool hasActiveBoss = false;
@@ -197,14 +201,12 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // THẮNG: Không còn enemy nào sống + (nếu cần Boss thì đã spawn)
         if (!hasActiveEnemy && (!_bossRequired || _hasBossSpawned))
         {
             SetGameOver(true);
             return;
         }
 
-        // SPAWN BOSS: Đã diệt hết quái thường + chưa spawn boss
         if (_bossRequired && !hasActiveBoss && !_hasBossSpawned && !hasActiveEnemy)
         {
             SpawnBoss();
@@ -263,33 +265,54 @@ public class LevelManager : MonoBehaviour
     public void SetCurrentLives(int v)
     {
         _currentLives = Mathf.Max(v, 0);
-        _livesInfo.text = $"Lives: {_currentLives}";
+        if (_livesInfo != null)
+            _livesInfo.text = $"Lives: {_currentLives}";
     }
 
     public void SetTotalEnemy(int v)
     {
         _enemyCounter = v;
-        _totalEnemyInfo.text = $"Total Enemy: {Mathf.Max(_enemyCounter, 0)}";
+        if (_totalEnemyInfo != null)
+            _totalEnemyInfo.text = $"Total Enemy: {Mathf.Max(_enemyCounter, 0)}";
     }
 
+    // SỬA: HIỆN PANEL + TĂNG TỐC ĐỘ BẮN
     public void SetGameOver(bool win)
     {
         IsOver = true;
-        _statusInfo.text = win ? "You Win!" : "You Lose!";
-        _panel.SetActive(true);
+        if (_statusInfo != null)
+            _statusInfo.text = win ? "You Win!" : "You Lose!";
+        if (_panel != null)
+            _panel.SetActive(true); // BẮT BUỘC HIỆN PANEL
 
         if (win)
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
             int nextLevel = currentLevel + 1;
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
-
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
                 PlayerPrefs.Save();
-                Debug.Log($"[LevelManager] Unlocked Level {nextLevel}");
             }
+
+            // TĂNG TỐC ĐỘ BẮN TOWER KHI TĂNG TỐC GAME
+            IncreaseTowerFireRateOnSpeedUp();
+        }
+    }
+
+    // TĂNG TỐC ĐỘ BẮN KHI TĂNG TỐC GAME
+    private void IncreaseTowerFireRateOnSpeedUp()
+    {
+        float speedMultiplier = Time.timeScale; // 1x, 2x, 3x...
+        float reduction = _shootDelayReducePerSpeedLevel * (speedMultiplier - 1);
+
+        foreach (Tower t in _spawnedTowers)
+        {
+            if (t == null) continue;
+            float baseDelay = t.GetBaseShootDelay(); // CẦN THÊM HÀM NÀY TRONG Tower
+            float newDelay = baseDelay / speedMultiplier - reduction;
+            t.SetShootDelay(Mathf.Max(newDelay, 0.2f));
         }
     }
 
@@ -300,36 +323,34 @@ public class LevelManager : MonoBehaviour
         {
             Tower t = p.GetPlacedTower();
             if (t != null && CanPlaceTower(t))
+            {
                 p.LockTowerPlacement();
+            }
         }
     }
 
     public void AddEnergy(int v)
     {
-        _currentEnergy += v; SetEnergy(_currentEnergy);
+        _currentEnergy += v;
+        SetEnergy(_currentEnergy);
     }
 
     public void SetEnergy(int v)
     {
-        _currentEnergy = v; _energyInfo.text = $"Energy: {_currentEnergy}";
+        _currentEnergy = v;
+        if (_energyInfo == null)
+        {
+            GameObject obj = GameObject.Find("EnergyText");
+            if (obj != null)
+                _energyInfo = obj.GetComponent<TMPro.TextMeshProUGUI>();
+        }
         if (_energyInfo != null)
-        {
             _energyInfo.text = $"Energy: {_currentEnergy}";
-        }
-        else
-        {
-            Debug.LogWarning("LevelManager: _energyInfo chưa được gán trong Inspector hoặc đã bị hủy tại runtime.");
-        }
     }
 
     public bool CanPlaceTower(Tower t)
     {
-        if (_currentEnergy >= t.EnergyCost)
-        {
-            AddEnergy(-t.EnergyCost);
-            return true;
-        }
-        Debug.Log("Not enough energy!");
-        return false;
+        if (t == null) return false;
+        return _currentEnergy >= t.EnergyCost;
     }
 }

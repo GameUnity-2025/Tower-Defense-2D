@@ -4,25 +4,16 @@ using UnityEngine;
 
 public class Boss : Enemy
 {
-    [SerializeField] private int _bossMaxHealth = 500; // Máu tối đa cao hơn
-    [SerializeField] private GameObject _projectilePrefab; // Prefab đạn của Boss
-    [SerializeField] private float _attackRate = 1.5f; // Tần suất bắn (giây)
-    [SerializeField] private float _projectileSpeed = 3f; // Tốc độ đạn
+    [SerializeField] private int _bossMaxHealth = 500;
+    [SerializeField] private GameObject _projectilePrefab;
+    [SerializeField] private float _attackRate = 1.5f;
+    [SerializeField] private float _projectileSpeed = 3f;
+
     private float _attackTimer;
-
-    // --- Shield fields ---
-    [Header("Shield")]
-    [SerializeField] private bool _startWithShield = true;            // nếu true thì tự bật khi spawn
-
-    [SerializeField] private int _shieldDefaultHP = 200;              // lượng shield mặc định
-    [SerializeField] private float _shieldDefaultDuration = 8f;      // thời gian tồn tại của shield
-    [SerializeField] private Shield _shieldComponent; // mới: tham chiếu đến Shield component
-
     private Vector2 _originalHealthBarSize = new Vector2(0.75f, 0.15f);
 
     private void Awake()
     {
-        // Ghi nhớ kích thước gốc (hoặc đặt thủ công)
         if (_healthBar != null)
             _originalHealthBarSize = _healthBar.size;
     }
@@ -32,32 +23,18 @@ public class Boss : Enemy
         _maxHealth = _bossMaxHealth;
         base.OnEnable();
 
-        // Tự động mở rộng thanh máu theo _maxHealth
         if (_healthBar != null && _healthFill != null)
         {
-            float scaleFactor = _maxHealth / 100f;
-            Vector2 baseSize = _healthBar.size;
-            _healthBar.size = new Vector2(baseSize.x * scaleFactor, baseSize.y);
+            float scale = _maxHealth / 100f;
+            _healthBar.size = new Vector2(_originalHealthBarSize.x * scale, _originalHealthBarSize.y);
             _healthFill.size = _healthBar.size;
         }
-
-        // Mỗi lần clone hoặc reset enemy, ép lại size đúng
-        if (_healthBar != null)
-            _healthBar.size = _originalHealthBarSize;
-        if (_healthFill != null)
-            _healthFill.size = _originalHealthBarSize;
-
         _attackTimer = 0f;
-        if (_startWithShield && _shieldComponent != null)
-            _shieldComponent.Activate(_shieldDefaultHP, _shieldDefaultDuration);
     }
 
     private void Update()
     {
-        // Di chuyển đến mục tiêu
         MoveToTarget();
-
-        // Tấn công định kỳ
         _attackTimer += Time.deltaTime;
         if (_attackTimer >= _attackRate)
         {
@@ -68,61 +45,33 @@ public class Boss : Enemy
 
     public override void MoveToTarget()
     {
-        // Gọi hàm di chuyển của Enemy
         base.MoveToTarget();
-
-        // Rung lắc nhẹ khi di chuyển (hiệu ứng boss)
         transform.position += new Vector3(
             Random.Range(-0.1f, 0.1f),
             Random.Range(-0.1f, 0.1f),
             0f
-        ) * Time.deltaTime;
+        ) * Time.unscaledDeltaTime;
     }
 
     public override void ReduceEnemyHealth(int damage)
     {
-        if (_shieldComponent != null && _shieldComponent.IsActive)
-        {
-            int leftover = _shieldComponent.AbsorbDamage(damage);
-            if (leftover > 0)
-            {
-                base.ReduceEnemyHealth(leftover);
-            }
-            else
-            {
-                // shield đã ăn hết damage → không gọi base
-            }
-            return;
-        }
-
         base.ReduceEnemyHealth(damage);
-
-        // Hiệu ứng nhấp nháy thanh máu khi máu dưới 20%
         if (_currentHealth > 0 && _currentHealth <= _maxHealth * 0.2f && _healthFill != null)
-        {
             StartCoroutine(FlashHealthBar());
-        }
     }
 
     private void Attack()
     {
-        if (_projectilePrefab != null)
+        if (_projectilePrefab == null) return;
+        GameObject p = Instantiate(_projectilePrefab, transform.position, Quaternion.identity);
+        Rigidbody2D rb = p.GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            GameObject projectile = Instantiate(_projectilePrefab, transform.position, Quaternion.identity);
-            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                // Bắn theo 8 hướng (hoặc ngẫu nhiên)
-                float angle = Random.Range(0f, 360f);
-                Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-                rb.velocity = direction * _projectileSpeed;
-            }
-
-            if (AudioPlayer.Instance != null)
-            {
-                AudioPlayer.Instance.PlaySFX("boss-attack");
-            }
+            float angle = Random.Range(0f, 360f);
+            Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            rb.velocity = dir * _projectileSpeed;
         }
+        AudioPlayer.Instance?.PlaySFX("boss-attack");
     }
 
     private IEnumerator FlashHealthBar()

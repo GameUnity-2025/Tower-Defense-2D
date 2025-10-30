@@ -32,6 +32,7 @@ public class Tower : MonoBehaviour
     private Enemy _targetEnemy;
     private Quaternion _targetRotation;
     private bool _isPlaced = false;
+    private float _baseShootDelay;
 
     public Vector2? PlacePosition { get; private set; }
     public int EnergyCost => _energyCost;
@@ -47,6 +48,7 @@ public class Tower : MonoBehaviour
     {
         ResetStats();
         _runningShootDelay = _currentDelay;
+        _baseShootDelay = _shootDelay;
     }
 
     private void ResetStats()
@@ -101,6 +103,8 @@ public class Tower : MonoBehaviour
             _isPlaced = true;
             PlacePosition = null;
             gameObject.name = gameObject.name.Replace("(Clone)", "").Trim();
+
+            LevelManager.Instance?.AddEnergy(-EnergyCost);
         }
     }
 
@@ -168,7 +172,7 @@ public class Tower : MonoBehaviour
     {
         if (_targetEnemy == null || !_isPlaced || _bulletPrefab == null) return;
 
-        _runningShootDelay -= Time.unscaledDeltaTime;
+        _runningShootDelay -= Time.deltaTime;
         if (_runningShootDelay > 0f) return;
         if (Quaternion.Angle(_towerHead.transform.rotation, _targetRotation) > 10f) return;
 
@@ -183,7 +187,6 @@ public class Tower : MonoBehaviour
 
         _runningShootDelay = _currentDelay;
     }
-
     private void OnDrawGizmosSelected()
     {
         if (_isPlaced)
@@ -193,5 +196,12 @@ public class Tower : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, _currentDistance);
         }
+    }
+    public float GetBaseShootDelay() => _baseShootDelay;
+
+    public void SetShootDelay(float delay)
+    {
+        _currentDelay = delay;
+        _runningShootDelay = delay;
     }
 }
