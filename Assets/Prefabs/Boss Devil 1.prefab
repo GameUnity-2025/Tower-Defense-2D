@@ -417,7 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f626fe14f43df85498d7a4d90400a341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 8
+  _maxHealth: 20
   _moveSpeed: 1
   _healthBar: {fileID: 7721446701833484314}
   _healthFill: {fileID: 4689126181955608224}
@@ -425,7 +425,3 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 0}
   _attackRate: 1.5
   _projectileSpeed: 3
-  _startWithShield: 1
-  _shieldDefaultHP: 3
-  _shieldDefaultDuration: 2
-  _shieldRenderer: {fileID: 6085218391581748907}

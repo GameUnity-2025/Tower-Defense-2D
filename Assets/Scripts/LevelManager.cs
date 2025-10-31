@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class LevelManager : MonoBehaviour
 {
     private static LevelManager _instance = null;
-
     public static LevelManager Instance
     {
         get
@@ -27,9 +26,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Enemy[] _enemyPrefabs;
     [SerializeField] private Transform[] _enemyPaths;
     [SerializeField] private float _spawnDelay = 5f;
-    [SerializeField] private Boss _bossPrefab;
+    [SerializeField] private Boss _bossPrefab; // KÉO BOSS VÀO ĐÂY → TỰ ĐỘNG XUẤT HIỆN
     private bool _hasBossSpawned = false;
-    private bool _bossRequired = false;
     private List<Enemy> _spawnedEnemies = new List<Enemy>();
     private float _runningSpawnDelay;
     private List<Bullet> _spawnedBullets = new List<Bullet>();
@@ -38,7 +36,7 @@ public class LevelManager : MonoBehaviour
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3;
     [SerializeField] private int _totalEnemy = 15;
-    [SerializeField] private GameObject _panel; // PANEL WIN/LOSE
+    [SerializeField] private GameObject _panel;
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
@@ -54,13 +52,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _energyFromEnemy = 20;
     private float _energyTimer = 0f;
 
-    // TĂNG TỐC ĐỘ BẮN TOWER KHI TĂNG TỐC GAME
-    [SerializeField] private float _shootDelayReducePerSpeedLevel = 0.15f;
-
     public int GetCurrentEnergy() => _currentEnergy;
 
     /* ============================================================= */
-
     private void Start()
     {
         SetCurrentLives(_maxLives);
@@ -69,9 +63,7 @@ public class LevelManager : MonoBehaviour
         SetEnergy(_currentEnergy);
         InstantiateAllTowerUI();
         _runningSpawnDelay = _spawnDelay;
-        _bossRequired = IsBossLevel();
 
-        // ẨN PANEL BAN ĐẦU
         if (_panel != null) _panel.SetActive(false);
     }
 
@@ -81,7 +73,7 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         if (IsOver || Time.timeScale <= 0f) return;
 
-        // SPAWN
+        // SPAWN QUÁI THƯỜNG
         if (_enemyCounter > 0)
         {
             _runningSpawnDelay -= Time.deltaTime;
@@ -131,7 +123,6 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
-
     private void SpawnNormalEnemy()
     {
         SetTotalEnemy(--_enemyCounter);
@@ -147,16 +138,47 @@ public class LevelManager : MonoBehaviour
         enemy.gameObject.SetActive(true);
     }
 
-    private bool IsBossLevel() => SceneManager.GetActiveScene().buildIndex == 5;
+    // TỰ ĐỘNG KIỂM TRA BOSS
+    public void CheckWinCondition()
+    {
+        if (_enemyCounter > 0) return;
+
+        bool hasActiveNormalEnemy = false;
+        bool hasActiveBoss = false;
+
+        foreach (Enemy e in _spawnedEnemies)
+        {
+            if (e.gameObject.activeSelf)
+            {
+                if (e is Boss) hasActiveBoss = true;
+                else hasActiveNormalEnemy = true;
+            }
+        }
+
+        // NẾU CÓ BOSS PREFAB VÀ CHƯA XUẤT HIỆN → SPAWN
+        if (_bossPrefab != null && !_hasBossSpawned && !hasActiveNormalEnemy)
+        {
+            SpawnBoss();
+            _hasBossSpawned = true;
+            return;
+        }
+
+        // NẾU KHÔNG CÒN QUÁI NÀO → THẮNG
+        if (!hasActiveNormalEnemy && (!hasActiveBoss || !_hasBossSpawned))
+        {
+            SetGameOver(true);
+        }
+    }
 
     private void SpawnBoss()
     {
-        if (_bossPrefab == null) { Debug.LogError("Boss Prefab missing!"); return; }
+        if (_bossPrefab == null) return;
+
         GameObject go = Instantiate(_bossPrefab.gameObject);
         Boss boss = go.GetComponent<Boss>();
         if (boss == null)
         {
-            Debug.LogError("Spawned object does not have a Boss component.");
+            Debug.LogError("Boss Prefab không có component Boss!");
             Destroy(go);
             return;
         }
@@ -166,10 +188,6 @@ public class LevelManager : MonoBehaviour
         boss.SetTargetPosition(_enemyPaths[1].position);
         boss.SetCurrentPathIndex(1);
         boss.gameObject.SetActive(true);
-
-        //boss.ActivateShield();
-
-        _hasBossSpawned = true;
 
         if (_statusInfo != null)
         {
@@ -184,38 +202,6 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
-
-    public void CheckWinCondition()
-    {
-        if (_enemyCounter > 0) return;
-
-        bool hasActiveEnemy = false;
-        bool hasActiveBoss = false;
-
-        foreach (Enemy e in _spawnedEnemies)
-        {
-            if (e.gameObject.activeSelf)
-            {
-                hasActiveEnemy = true;
-                if (e is Boss) hasActiveBoss = true;
-            }
-        }
-
-        if (!hasActiveEnemy && (!_bossRequired || _hasBossSpawned))
-        {
-            SetGameOver(true);
-            return;
-        }
-
-        if (_bossRequired && !hasActiveBoss && !_hasBossSpawned && !hasActiveEnemy)
-        {
-            SpawnBoss();
-            _hasBossSpawned = true;
-        }
-    }
-
-    /* ============================================================= */
-
     private void InstantiateAllTowerUI()
     {
         foreach (Tower t in _towerPrefabs)
@@ -228,17 +214,7 @@ public class LevelManager : MonoBehaviour
     }
 
     public void RegisterSpawnedTower(Tower t) => _spawnedTowers.Add(t);
-
     public void RegisterSpawnedTowerRemoval(Tower tower) => _spawnedTowers.Remove(tower);
-
-    private void OnDrawGizmos()
-    {
-        for (int i = 0; i < _enemyPaths.Length - 1; i++)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(_enemyPaths[i].position, _enemyPaths[i + 1].position);
-        }
-    }
 
     public Bullet GetBulletFromPool(Bullet prefab)
     {
@@ -276,14 +252,13 @@ public class LevelManager : MonoBehaviour
             _totalEnemyInfo.text = $"Total Enemy: {Mathf.Max(_enemyCounter, 0)}";
     }
 
-    // SỬA: HIỆN PANEL + TĂNG TỐC ĐỘ BẮN
     public void SetGameOver(bool win)
     {
         IsOver = true;
         if (_statusInfo != null)
             _statusInfo.text = win ? "You Win!" : "You Lose!";
         if (_panel != null)
-            _panel.SetActive(true); // BẮT BUỘC HIỆN PANEL
+            _panel.SetActive(true);
 
         if (win)
         {
@@ -295,24 +270,6 @@ public class LevelManager : MonoBehaviour
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
                 PlayerPrefs.Save();
             }
-
-            // TĂNG TỐC ĐỘ BẮN TOWER KHI TĂNG TỐC GAME
-            IncreaseTowerFireRateOnSpeedUp();
-        }
-    }
-
-    // TĂNG TỐC ĐỘ BẮN KHI TĂNG TỐC GAME
-    private void IncreaseTowerFireRateOnSpeedUp()
-    {
-        float speedMultiplier = Time.timeScale; // 1x, 2x, 3x...
-        float reduction = _shootDelayReducePerSpeedLevel * (speedMultiplier - 1);
-
-        foreach (Tower t in _spawnedTowers)
-        {
-            if (t == null) continue;
-            float baseDelay = t.GetBaseShootDelay(); // CẦN THÊM HÀM NÀY TRONG Tower
-            float newDelay = baseDelay / speedMultiplier - reduction;
-            t.SetShootDelay(Mathf.Max(newDelay, 0.2f));
         }
     }
 
