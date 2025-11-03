@@ -4,16 +4,16 @@ using UnityEngine;
 public class Tower : MonoBehaviour
 {
     // === COMPONENT ===
-    [SerializeField] private SpriteRenderer _towerPlace;
-    [SerializeField] private SpriteRenderer _towerHead;
+    [SerializeField] protected SpriteRenderer _towerPlace;
+    [SerializeField] protected SpriteRenderer _towerHead;
 
     // === BASE STATS (CẤP 1) ===
     [SerializeField] private int _shootPower = 1;
     [SerializeField] private float _shootDistance = 1f;
     [SerializeField] private float _shootDelay = 5f;
-    [SerializeField] private float _bulletSpeed = 1f;
-    [SerializeField] private float _bulletSplashRadius = 0f;
-    [SerializeField] private Bullet _bulletPrefab;
+    [SerializeField] protected float _bulletSpeed = 1f;
+    [SerializeField] protected float _bulletSplashRadius = 0f;
+    [SerializeField] protected Bullet _bulletPrefab;
     [SerializeField] private int _energyCost = 50;
 
     // === NÂNG CẤP ===
@@ -23,16 +23,16 @@ public class Tower : MonoBehaviour
     [SerializeField] private float _fireRateMultiplier = 0.7f;
 
     // === RUNTIME ===
-    private int _currentLevel = 1;
-    private const int MAX_LEVEL = 3;
-    private float _currentPower;
-    private float _currentDistance;
-    private float _currentDelay;
-    private float _runningShootDelay;
-    private Enemy _targetEnemy;
-    private Quaternion _targetRotation;
-    private bool _isPlaced = false;
-    private float _baseShootDelay;
+    protected  int _currentLevel = 1;
+    protected  const int MAX_LEVEL = 3;
+    protected  float _currentPower;
+    protected  float _currentDistance;
+    protected  float _currentDelay;
+    protected  float _runningShootDelay;
+    protected  Enemy _targetEnemy;
+    protected  Quaternion _targetRotation;
+    protected  bool _isPlaced = false;
+    protected  float _baseShootDelay;
 
     public Vector2? PlacePosition { get; private set; }
     public int EnergyCost => _energyCost;
@@ -44,7 +44,7 @@ public class Tower : MonoBehaviour
     public float GetShootDelay() => _currentDelay;
     public int GetUpgradeCost() => _currentLevel < MAX_LEVEL ? _upgradeCosts[_currentLevel - 1] : 0;
 
-    private void Start()
+    protected virtual void Start()  
     {
         ResetStats();
         _runningShootDelay = _currentDelay;
@@ -168,10 +168,9 @@ public class Tower : MonoBehaviour
             _towerHead.transform.rotation, _targetRotation, Time.deltaTime * 180f);
     }
 
-    public void ShootTarget()
+    public virtual void ShootTarget()  
     {
         if (_targetEnemy == null || !_isPlaced || _bulletPrefab == null) return;
-
         _runningShootDelay -= Time.deltaTime;
         if (_runningShootDelay > 0f) return;
         if (Quaternion.Angle(_towerHead.transform.rotation, _targetRotation) > 10f) return;
