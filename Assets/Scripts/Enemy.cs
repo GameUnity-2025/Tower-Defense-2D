@@ -1,30 +1,90 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] protected int _maxHealth = 1;
-    [SerializeField] protected float _moveSpeed = 1f; // TỐC ĐỘ CỐ ĐỊNH
+    [Header("=== ENEMY STATS ===")]
+    [SerializeField] protected int _maxHealth = 100;
+    [SerializeField] protected float _moveSpeed = 1f;
+
+    [Header("=== UI/HEALTH ===")]
     [SerializeField] protected SpriteRenderer _healthBar;
     [SerializeField] protected SpriteRenderer _healthFill;
 
+    [Header("=== EFFECTS ===")]
+    [SerializeField] private GameObject _burnEffectPrefab;
+    private GameObject _activeBurnEffect;
+
+    [HideInInspector] public bool IsBurning = false;
     protected int _currentHealth;
     protected float _baseMoveSpeed;
 
+    private float _burnTimer = 0f;
+    private float _damagePerSecond = 0f;
+    private float _damageAccumulator = 0f;
+
     public Vector3 TargetPosition { get; private set; }
     public int CurrentPathIndex { get; private set; }
+    public int CurrentHealth => _currentHealth;
 
     protected virtual void OnEnable()
     {
         _currentHealth = _maxHealth;
-        _baseMoveSpeed = _moveSpeed; // Lưu tốc độ gốc
+        _baseMoveSpeed = _moveSpeed;
 
         if (_healthFill != null && _healthBar != null)
             _healthFill.size = _healthBar.size;
+
+        if (_activeBurnEffect != null)
+        {
+            Destroy(_activeBurnEffect);
+            _activeBurnEffect = null;
+        }
+
+        IsBurning = false;
+        _burnTimer = 0f;
+        _damageAccumulator = 0f;
     }
+
+    protected virtual void Update()
+    {
+        if (_healthBar != null)
+        {
+            _healthBar.transform.position = transform.position + new Vector3(0, 0.5f, 0);
+        }
+
+        if (IsBurning)
+        {
+
+            _damageAccumulator += _damagePerSecond * Time.deltaTime;
+
+            if (_damageAccumulator >= 1f)
+            {
+                int burnDmg = Mathf.FloorToInt(_damageAccumulator);
+                ReduceEnemyHealth(burnDmg);
+                _damageAccumulator -= burnDmg;
+            }
+
+            _burnTimer -= Time.deltaTime;
+
+            if (_burnTimer <= 0)
+            {
+                if (_damageAccumulator > 0)
+                {
+                    int finalDmg = Mathf.CeilToInt(_damageAccumulator);
+                    ReduceEnemyHealth(finalDmg);
+                }
+
+                StopBurnEffect();
+                SetBurning(false);
+                _damageAccumulator = 0f;
+            }
+        }
+    }
+
 
     public virtual void MoveToTarget()
     {
-        // DÙNG deltaTime → TĂNG TỐC KHI Time.timeScale > 1
         transform.position = Vector3.MoveTowards(
             transform.position,
             TargetPosition,
@@ -32,32 +92,20 @@ public class Enemy : MonoBehaviour
         );
     }
 
-    public void SetTargetPosition(Vector3 targetPosition)
+    public void SetTargetPosition(Vector3 position)
     {
-        TargetPosition = targetPosition;
-        if (_healthBar != null)
-            _healthBar.transform.parent = null;
-
-        Vector3 distance = TargetPosition - transform.position;
-        transform.rotation = Quaternion.Euler(0f, 0f,
-            Mathf.Abs(distance.y) > Mathf.Abs(distance.x)
-                ? (distance.y > 0 ? 90f : -90f)
-                : (distance.x > 0 ? 0f : 180f)
-        );
-
-        if (_healthBar != null)
-            _healthBar.transform.parent = transform;
+        TargetPosition = position;
     }
 
-    public void SetCurrentPathIndex(int currentIndex)
+    public void SetCurrentPathIndex(int index)
     {
-        CurrentPathIndex = currentIndex;
+        CurrentPathIndex = index;
     }
 
     public virtual void ReduceEnemyHealth(int damage)
     {
         _currentHealth -= damage;
-        AudioPlayer.Instance?.PlaySFX("hit-enemy");
+         AudioPlayer.Instance?.PlaySFX("hit-enemy"); 
 
         if (_currentHealth <= 0)
         {
@@ -72,19 +120,91 @@ public class Enemy : MonoBehaviour
     protected virtual void Die()
     {
         _currentHealth = 0;
+        StopBurnEffect();
+
         gameObject.SetActive(false);
-        AudioPlayer.Instance?.PlaySFX("enemy-die");
-        LevelManager.Instance?.AddEnergy(20);
+         AudioPlayer.Instance?.PlaySFX("enemy-die");
+         LevelManager.Instance?.AddEnergy(20); 
         LevelManager.Instance?.CheckWinCondition();
     }
 
-    private void UpdateHealthBar()
+    protected virtual void UpdateHealthBar()
     {
         if (_healthFill == null || _healthBar == null) return;
-        float p = (float)_currentHealth / _maxHealth;
-        _healthFill.size = new Vector2(p * _healthBar.size.x, _healthBar.size.y);
+
+        float ratio = (float)_currentHealth / _maxHealth;
+
+        Vector2 size = _healthFill.size;
+        size.x = _healthBar.size.x * ratio;
+        _healthFill.size = size;
+
+        Vector3 position = _healthFill.transform.localPosition;
+        position.x = _healthBar.size.x * (ratio - 1) / 2;
+        _healthFill.transform.localPosition = position;
     }
 
-    public float GetBaseMoveSpeed() => _baseMoveSpeed;
-    public void SetMoveSpeed(float speed) => _moveSpeed = speed;
+
+    public void SetBurning(bool burning)
+    {
+        IsBurning = burning;
+    }
+
+    public void ApplyBurnEffect(float duration, float damagePerSecond)
+    {
+        _burnTimer = Mathf.Max(_burnTimer, duration);
+
+        _damagePerSecond = damagePerSecond;
+
+        if (!IsBurning)
+        {
+            SetBurning(true);
+            StartBurnEffect();
+        }
+    }
+
+    // --- BURN EFFECT VISUALS ---
+
+    public void StartBurnEffect()
+    {
+        if (_burnEffectPrefab != null && _activeBurnEffect == null)
+        {
+            _activeBurnEffect = Instantiate(_burnEffectPrefab, transform.position, Quaternion.identity, transform);
+
+            ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                var main = ps.main;
+                main.loop = true;
+                ps.Play();
+            }
+        }
+    }
+
+    public void StopBurnEffect()
+    {
+        if (_activeBurnEffect != null)
+        {
+            ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                var main = ps.main;
+                main.loop = false;
+                var emission = ps.emission;
+                emission.enabled = false;
+            }
+
+            Destroy(_activeBurnEffect, 2f);
+            _activeBurnEffect = null;
+        }
+    }
+
+    public float GetBaseMoveSpeed()
+    {
+        return _baseMoveSpeed;
+    }
+
+    public void SetMoveSpeed(float newSpeed)
+    {
+        _moveSpeed = newSpeed;
+    }
 }

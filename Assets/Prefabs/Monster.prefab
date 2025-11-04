@@ -102,6 +102,9 @@ MonoBehaviour:
   _moveSpeed: 1
   _healthBar: {fileID: 4965901767833607967}
   _healthFill: {fileID: 4007222524172987501}
+  _burnEffectPrefab: {fileID: 6431008935038505589, guid: b368f17ea3915af4b8ba7d3b5d360c61,
+    type: 3}
+  IsBurning: 0
 --- !u!1 &6478282514138260796
 GameObject:
   m_ObjectHideFlags: 0

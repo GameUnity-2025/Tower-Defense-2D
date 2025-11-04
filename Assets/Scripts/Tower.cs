@@ -7,6 +7,7 @@ public class Tower : MonoBehaviour
     [SerializeField] protected SpriteRenderer _towerPlace;
     [SerializeField] protected SpriteRenderer _towerHead;
 
+
     // === BASE STATS (CẤP 1) ===
     [SerializeField] private int _shootPower = 1;
     [SerializeField] private float _shootDistance = 1f;
@@ -33,7 +34,6 @@ public class Tower : MonoBehaviour
     protected  Quaternion _targetRotation;
     protected  bool _isPlaced = false;
     protected  float _baseShootDelay;
-
     public Vector2? PlacePosition { get; private set; }
     public int EnergyCost => _energyCost;
     public int CurrentLevel => _currentLevel;
@@ -43,7 +43,9 @@ public class Tower : MonoBehaviour
     public float GetShootDistance() => _currentDistance;
     public float GetShootDelay() => _currentDelay;
     public int GetUpgradeCost() => _currentLevel < MAX_LEVEL ? _upgradeCosts[_currentLevel - 1] : 0;
-
+  
+    // === BURN ===
+    [HideInInspector] public bool IsBurning = false;
     protected virtual void Start()  
     {
         ResetStats();
@@ -116,7 +118,7 @@ public class Tower : MonoBehaviour
     }
 
     // === CLICK TO SHOW PANEL ===
-    private void Update()
+    protected void Update()
     {
         if (!_isPlaced || !Input.GetMouseButtonDown(0)) return;
 
@@ -129,9 +131,12 @@ public class Tower : MonoBehaviour
     }
 
     // === TOWER AI ===
-    public void CheckNearestEnemy(List<Enemy> enemies)
+    public void CheckNearestEnemy()
     {
-        if (!_isPlaced || enemies == null) return;
+        if (!_isPlaced) return;
+
+        List<Enemy> enemies = LevelManager.Instance.GetEnemies();
+        if (enemies == null) return;
 
         if (_targetEnemy != null)
         {
@@ -155,7 +160,6 @@ public class Tower : MonoBehaviour
         }
         _targetEnemy = nearest;
     }
-
     public void SeekTarget()
     {
         if (_targetEnemy == null || !_isPlaced || _towerHead == null) return;
@@ -202,5 +206,10 @@ public class Tower : MonoBehaviour
     {
         _currentDelay = delay;
         _runningShootDelay = delay;
+    }
+
+    public void SetBurning(bool burning)
+    {
+        IsBurning = burning;
     }
 }

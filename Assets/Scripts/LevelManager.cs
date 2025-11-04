@@ -22,6 +22,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Tower[] _towerPrefabs;
     private List<Tower> _spawnedTowers = new List<Tower>();
 
+
     /* ---------- ENEMIES ---------- */
     [SerializeField] private Enemy[] _enemyPrefabs;
     [SerializeField] private Transform[] _enemyPaths;
@@ -31,7 +32,7 @@ public class LevelManager : MonoBehaviour
     private List<Enemy> _spawnedEnemies = new List<Enemy>();
     private float _runningSpawnDelay;
     private List<Bullet> _spawnedBullets = new List<Bullet>();
-
+    public List<Enemy> GetEnemies() => _spawnedEnemies;
     /* ---------- GAME STATE ---------- */
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3;
@@ -53,6 +54,7 @@ public class LevelManager : MonoBehaviour
     private float _energyTimer = 0f;
 
     public int GetCurrentEnergy() => _currentEnergy;
+
 
     /* ============================================================= */
     private void Start()
@@ -87,7 +89,7 @@ public class LevelManager : MonoBehaviour
         // TOWERS
         foreach (Tower t in _spawnedTowers)
         {
-            t.CheckNearestEnemy(_spawnedEnemies);
+            t.CheckNearestEnemy();
             t.SeekTarget();
             t.ShootTarget();
         }
