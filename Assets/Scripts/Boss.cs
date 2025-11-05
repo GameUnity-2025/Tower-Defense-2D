@@ -32,8 +32,14 @@ public class Boss : Enemy
         _attackTimer = 0f;
     }
 
-    private void Update()
+    // >> FIX LỖI DOT VÀ CẢNH BÁO CS0114 <<
+    // Dùng 'protected new' để giải quyết cảnh báo và Hiding (ẩn) hàm của lớp cha.
+    // Dùng 'base.Update()' để gọi logic DOT (Damage Over Time) từ lớp Enemy.
+    protected new void Update()
     {
+        // **BẮT BUỘC:** Gọi hàm Update của lớp cha để xử lý DOT
+        base.Update();
+
         MoveToTarget();
         _attackTimer += Time.deltaTime;
         if (_attackTimer >= _attackRate)
@@ -42,6 +48,7 @@ public class Boss : Enemy
             _attackTimer = 0f;
         }
     }
+    // << END FIX >>
 
     public override void MoveToTarget()
     {

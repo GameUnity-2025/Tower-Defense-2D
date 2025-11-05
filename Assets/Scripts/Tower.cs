@@ -41,7 +41,10 @@ public class Tower : MonoBehaviour
     // === GETTERS ===
     public int GetShootPower() => Mathf.RoundToInt(_currentPower);
     public float GetShootDistance() => _currentDistance;
-    public float GetShootDelay() => _currentDelay;
+    public float GetShootDelay()
+    {
+        return Mathf.Max(_shootDelay, 0.001f);
+    }
     public int GetUpgradeCost() => _currentLevel < MAX_LEVEL ? _upgradeCosts[_currentLevel - 1] : 0;
   
     // === BURN ===

@@ -35,7 +35,7 @@ public class TowerInfoPanel : MonoBehaviour
         UpdateInfo(tower);
 
         Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
-       ; // GIỮ NGUYÊN VỊ TRÍ CŨ
+        // GIỮ NGUYÊN VỊ TRÍ CŨ
 
         gameObject.SetActive(true);
     }
@@ -43,10 +43,20 @@ public class TowerInfoPanel : MonoBehaviour
     private void UpdateInfo(Tower tower)
     {
         string displayName = tower.name.Replace("(Clone)", "").Trim();
-        _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})"; // HIỆN LEVEL
-        _damageText.text = $"Damage: {tower.GetShootPower()}";
-        _rangeText.text = $"Range: {tower.GetShootDistance():F1}";
-        _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s";
+        _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
+
+        if (tower.GetType().Name.Contains("FireTower"))
+        {
+          
+        }
+        else
+        {
+            // Tháp thông thường
+            _damageText.text = $"Damage: {tower.GetShootPower()}";
+            _rangeText.text = $"Range: {tower.GetShootDistance():F1}";
+            _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s";
+        }
+        // **------------------------------------------**
 
         // === NÚT NÂNG CẤP ===
         if (tower.CurrentLevel < 3)
@@ -57,8 +67,10 @@ public class TowerInfoPanel : MonoBehaviour
             _upgradeButton.onClick.RemoveAllListeners();
             _upgradeButton.onClick.AddListener(() =>
             {
+                // Gọi hàm nâng cấp
                 tower.Upgrade();
-                UpdateInfo(tower); // CẬP NHẬT LẠI UI
+                // CẬP NHẬT LẠI UI ngay lập tức sau khi nâng cấp
+                UpdateInfo(tower);
             });
         }
         else
@@ -84,24 +96,19 @@ public class TowerInfoPanel : MonoBehaviour
         gameObject.SetActive(false);
         _currentTower = null;
     }
+
     private void UpdateUpgradeButton()
     {
-        if (_currentTower == null) return;
+        if (_currentTower == null || _currentTower.CurrentLevel >= 3) return;
 
-        if (_currentTower.CurrentLevel < 3)
-        {
-            int cost = _currentTower.GetUpgradeCost();
-            bool canUpgrade = _currentTower.CanUpgrade();
-            _upgradeButton.interactable = canUpgrade;
-            _upgradeButton.GetComponentInChildren<TMP_Text>().text = canUpgrade ? $"Upgrade ({cost})" : $"Upgrade ({cost})";
-            // Optional: đổi màu nếu muốn
-        }
-        else
-        {
-            _upgradeButton.interactable = false;
-            _upgradeButton.GetComponentInChildren<TMP_Text>().text = "MAX";
-        }
+        int cost = _currentTower.GetUpgradeCost();
+        bool canUpgrade = _currentTower.CanUpgrade();
+        _upgradeButton.interactable = canUpgrade;
+
+        // Cập nhật text để hiển thị chi phí và trạng thái
+        _upgradeButton.GetComponentInChildren<TMP_Text>().text = $"Upgrade ({cost})";
     }
+
     private void Update()
     {
         // 1. Click ngoài → ẩn panel
@@ -118,7 +125,7 @@ public class TowerInfoPanel : MonoBehaviour
         // 2. TỰ CẬP NHẬT NÚT UPGRADE MỖI FRAME
         if (_currentTower != null && gameObject.activeSelf)
         {
-            UpdateUpgradeButton(); // GỌI MỖI FRAME
+            UpdateUpgradeButton(); // GỌI MỖI FRAME để kiểm tra đủ tiền hay không
         }
     }
 }

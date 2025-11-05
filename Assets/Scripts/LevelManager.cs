@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,18 +22,20 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject _towerUIPrefab;
     [SerializeField] private Tower[] _towerPrefabs;
     private List<Tower> _spawnedTowers = new List<Tower>();
-
+    [SerializeField] private GameObject _damageTextPrefab;
+    [SerializeField] private Transform _damageTextContainer;
 
     /* ---------- ENEMIES ---------- */
     [SerializeField] private Enemy[] _enemyPrefabs;
     [SerializeField] private Transform[] _enemyPaths;
     [SerializeField] private float _spawnDelay = 5f;
-    [SerializeField] private Boss _bossPrefab; // KÉO BOSS VÀO ĐÂY → TỰ ĐỘNG XUẤT HIỆN
+    [SerializeField] private Boss _bossPrefab;
     private bool _hasBossSpawned = false;
     private List<Enemy> _spawnedEnemies = new List<Enemy>();
     private float _runningSpawnDelay;
     private List<Bullet> _spawnedBullets = new List<Bullet>();
     public List<Enemy> GetEnemies() => _spawnedEnemies;
+
     /* ---------- GAME STATE ---------- */
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3;
@@ -105,8 +108,21 @@ public class LevelManager : MonoBehaviour
                     e.SetTargetPosition(_enemyPaths[e.CurrentPathIndex].position);
                 else
                 {
-                    ReduceLives(1);
-                    e.gameObject.SetActive(false);
+                    // >> LOGIC MỚI: KIỂM TRA NẾU KẺ THÙ LÀ BOSS <<
+                    if (e is Boss)
+                    {
+                        // Nếu là Boss, Game Over ngay lập tức
+                        SetGameOver(false);
+                        e.gameObject.SetActive(false); // Vô hiệu hóa Boss sau khi thua
+                        return; // Ngừng vòng lặp và Update
+                    }
+                    else
+                    {
+                        // Nếu là quái thường, giảm Lives
+                        ReduceLives(1);
+                        e.gameObject.SetActive(false);
+                    }
+                    // << END LOGIC MỚI >>
                 }
             }
             else
@@ -311,5 +327,25 @@ public class LevelManager : MonoBehaviour
     {
         if (t == null) return false;
         return _currentEnergy >= t.EnergyCost;
+    }
+
+    public void ShowDamageText(int damage, Vector3 position)
+    {
+        if (_damageTextPrefab == null) return;
+        Vector3 spawnPosition = position;
+        spawnPosition.y += 0.5f;
+        spawnPosition.z = -1f;
+        GameObject damageTextGO = Instantiate(_damageTextPrefab, spawnPosition, Quaternion.identity);
+        if (_damageTextContainer != null)
+        {
+            damageTextGO.transform.SetParent(_damageTextContainer, true);
+            damageTextGO.transform.localScale = Vector3.one; // Reset Scale của con
+        }
+
+        DamageText damageText = damageTextGO.GetComponent<DamageText>();
+        if (damageText != null)
+        {
+            damageText.SetDamageValue(damage); 
+        }
     }
 }

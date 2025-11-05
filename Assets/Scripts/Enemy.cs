@@ -105,8 +105,13 @@ public class Enemy : MonoBehaviour
     public virtual void ReduceEnemyHealth(int damage)
     {
         _currentHealth -= damage;
-         AudioPlayer.Instance?.PlaySFX("hit-enemy"); 
-
+         AudioPlayer.Instance?.PlaySFX("hit-enemy");
+        if (damage > 0f)
+        {
+            LevelManager.Instance.ShowDamageText(damage, transform.position);
+        }
+        int intDamage = Mathf.CeilToInt(damage); 
+        _currentHealth -= intDamage;
         if (_currentHealth <= 0)
         {
             Die();
