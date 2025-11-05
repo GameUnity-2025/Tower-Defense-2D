@@ -1,159 +1,108 @@
 ﻿using UnityEngine;
-
 using System.Collections;
-
-
+using System.Collections.Generic; // Cần thiết nếu chưa có
 
 public class FireBullet : Bullet
-
 {
-
     [Header("=== FIRE BULLET SETTINGS ===")]
+    private int _towerLevel = 1; // Biến lưu trữ cấp độ
 
-    [SerializeField] private float _burnDamagePerSecond = 30f;
-
-    [SerializeField] private float _burnDuration = 2f;
+    // DPS: 0.5, 1.5, 2.5
+    [Header("=== BURN DOT STATS (INDEX 0: LV1, 1: LV2, 2: LV3) ===")]
+    [SerializeField] private float[] _burnDamagePerSecondByLevel = { 0.5f, 1.5f, 2.5f };
+    // Duration: 2.0, 3.0, 4.0
+    [SerializeField] private float[] _burnDurationByLevel = { 2.0f, 3.0f, 4.0f };
 
     [SerializeField] private float _maxTravelDistance = 5f;
-
     [SerializeField] private float _damageInterval = 0.1f;
-
     [SerializeField] private LayerMask _enemyLayer = -1;
-
-    [SerializeField] private float _damageRadius = 0.5f; 
-
-
+    [SerializeField] private float _damageRadius = 0.5f;
 
     private float _travelledDistance = 0f;
-
     private float _lastDamageTime = 0f;
-
     private Vector2 _direction;
-
     private int _debugDamageCount = 0;
 
+    // Property chỉ đọc để tính DPS/Duration dựa trên cấp độ hiện tại
+    private float CurrentBurnDPS => GetDPSForLevel(_towerLevel);
+    private float CurrentBurnDuration => GetDurationForLevel(_towerLevel);
 
+    // === HÀM GET ĐỂ TOWER/UI TRUY CẬP ===
+    public float GetDPSForLevel(int level)
+    {
+        int index = level - 1;
+        if (index >= 0 && index < _burnDamagePerSecondByLevel.Length)
+        {
+            return _burnDamagePerSecondByLevel[index];
+        }
+        return 0f;
+    }
+
+    public float GetDurationForLevel(int level)
+    {
+        int index = level - 1;
+        if (index >= 0 && index < _burnDurationByLevel.Length)
+        {
+            return _burnDurationByLevel[index];
+        }
+        return 0f;
+    }
+    // === HẾT HÀM GET ===
 
     protected override void OnEnable()
-
     {
-
         base.OnEnable();
-
+        // RẤT QUAN TRỌNG: Loại bỏ logic tìm kiếm mục tiêu của Bullet
         _targetEnemy = null;
 
         _direction = transform.up;
-
         _travelledDistance = 0f;
-
         _lastDamageTime = 0f;
-
         _debugDamageCount = 0;
-
-
-
-        Debug.Log($"[FireBullet] Spawned! Power: {BulletPower}, Speed: {BulletSpeed}, Direction: {_direction}");
-
     }
 
-
+    /// <summary>
+    /// Được FireTower gọi để thiết lập cấp độ tháp đã bắn ra viên đạn này.
+    /// </summary>
+    public void SetTowerLevel(int level)
+    {
+        _towerLevel = level;
+    }
 
     private void Update()
-
     {
-
         if (!gameObject.activeSelf) return;
-
-
 
         float moveDistance = BulletSpeed * Time.deltaTime;
-
         transform.Translate(_direction * moveDistance, Space.World);
-
         _travelledDistance += moveDistance;
 
-
-
         if (Time.time - _lastDamageTime >= _damageInterval)
-
         {
-
             DamageEnemiesInArea();
-
             _lastDamageTime = Time.time;
-
         }
-
-
 
         if (_travelledDistance >= _maxTravelDistance)
-
         {
-
-            Debug.Log($"[FireBullet] Destroyed after {_travelledDistance:F1}m");
-
             gameObject.SetActive(false);
-
         }
-
     }
-
-
 
     private void DamageEnemiesInArea()
-
     {
-
-        // Vòng tròn va chạm AoE
-
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, _damageRadius, _enemyLayer);
 
-        Debug.Log($"[FireBullet] Checked {hits.Length} enemies at pos {transform.position}");
-
-
-
         foreach (Collider2D hit in hits)
-
         {
-
             Enemy enemy = hit.GetComponent<Enemy>();
-
             if (enemy != null)
-
             {
-
-                enemy.ApplyBurnEffect(_burnDuration, _burnDamagePerSecond);
-
+                // ** SỬ DỤNG GIÁ TRỊ TỰ TÍNH TOÁN **
+                enemy.ApplyBurnEffect(CurrentBurnDuration, CurrentBurnDPS);
             }
-
         }
-
     }
-
-
-
-    private void OnDrawGizmosSelected()
-
-    {
-
-        if (!gameObject.activeSelf) return;
-
-
-
-        Gizmos.color = Color.red;
-
-        Gizmos.DrawWireSphere(transform.position, _damageRadius); // Vẽ vòng tròn này
-
-
-
-        Gizmos.color = Color.yellow;
-
-        Gizmos.DrawRay(transform.position, _direction * 2f);
-
-    }
-
-
-
     private void OnDrawGizmos()
 
     {

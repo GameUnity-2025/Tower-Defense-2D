@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System; // Cần thiết nếu chưa có
 
 public class TowerInfoPanel : MonoBehaviour
 {
@@ -21,7 +22,6 @@ public class TowerInfoPanel : MonoBehaviour
         {
             Instance = this;
             if (gameObject.activeSelf) gameObject.SetActive(false);
-            Debug.Log("[TowerInfoPanel] Initialized!");
         }
         else
         {
@@ -45,9 +45,21 @@ public class TowerInfoPanel : MonoBehaviour
         string displayName = tower.name.Replace("(Clone)", "").Trim();
         _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
 
+        // Sử dụng GetType().Name.Contains thay vì 'is FireTower' để tránh lỗi nếu tên class khác
         if (tower.GetType().Name.Contains("FireTower"))
         {
-          
+            // ** CẬP NHẬT THÔNG TIN CHO FIRE TOWER (DOT) **
+            FireTower fireTower = tower as FireTower;
+            if (fireTower != null)
+            {
+                // GỌI CÁC HÀM GET MỚI ĐỂ LẤY CHỈ SỐ TỪ PREFAB FIRE BULLET
+                float dps = fireTower.GetCurrentBurnDPS();
+                float duration = fireTower.GetCurrentBurnDuration();
+
+                _damageText.text = $"Burn DPS: {dps:F1}"; // Hiển thị DPS
+                _rangeText.text = $"Burn Duration: {duration:F1}s"; // Hiển thị Duration
+                _fireRateText.text = $"Rate: {1f / fireTower.GetShootDelay():F2}/s";
+            }
         }
         else
         {
@@ -67,10 +79,8 @@ public class TowerInfoPanel : MonoBehaviour
             _upgradeButton.onClick.RemoveAllListeners();
             _upgradeButton.onClick.AddListener(() =>
             {
-                // Gọi hàm nâng cấp
                 tower.Upgrade();
-                // CẬP NHẬT LẠI UI ngay lập tức sau khi nâng cấp
-                UpdateInfo(tower);
+                UpdateInfo(tower); // CẬP NHẬT LẠI UI sau khi nâng cấp
             });
         }
         else
@@ -83,14 +93,17 @@ public class TowerInfoPanel : MonoBehaviour
         _sellButton.onClick.RemoveAllListeners();
         _sellButton.onClick.AddListener(() =>
         {
-            int refund = tower.EnergyCost / 2;
-            LevelManager.Instance.AddEnergy(refund);
-            LevelManager.Instance.RegisterSpawnedTowerRemoval(tower);
+            // Giả định LevelManager tồn tại và có RegisterSpawnedTowerRemoval
+            if (LevelManager.Instance != null)
+            {
+                int refund = tower.EnergyCost / 2;
+                LevelManager.Instance.AddEnergy(refund);
+                LevelManager.Instance.RegisterSpawnedTowerRemoval(tower); // Đảm bảo gọi hàm này
+            }
             Destroy(tower.gameObject);
             HidePanel();
         });
     }
-
     public void HidePanel()
     {
         gameObject.SetActive(false);
