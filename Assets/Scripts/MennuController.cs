@@ -7,10 +7,11 @@ public class MennuController : MonoBehaviour
 {
     public void OnStartButton()
     {
-        int lastLevel = PlayerPrefs.GetInt("LastLevel", 1); 
-        Debug.Log("Loading Level: Level" + lastLevel); 
+        int lastLevel = PlayerPrefs.GetInt("LastLevel", 1);
+        Debug.Log("Loading Level: Level" + lastLevel);
         SceneManager.LoadScene("Level" + lastLevel);
     }
+
     public void OnSelectLevelButton()
     {
         Debug.Log("Loading LevelSelect");

@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems; // << Cần thiết cho mobile/touch
 
-public class Tower : MonoBehaviour
+public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFACE NÀY
 {
     // === COMPONENT ===
     [SerializeField] protected SpriteRenderer _towerPlace;
     [SerializeField] protected SpriteRenderer _towerHead;
 
 
-    // === BASE STATS (CẤP 1) ===
+    // === BASE STATS (LEVEL 1) ===
     [SerializeField] private int _shootPower = 1;
     [SerializeField] private float _shootDistance = 1f;
     [SerializeField] private float _shootDelay = 5f;
@@ -17,23 +18,23 @@ public class Tower : MonoBehaviour
     [SerializeField] protected Bullet _bulletPrefab;
     [SerializeField] private int _energyCost = 50;
 
-    // === NÂNG CẤP ===
+    // === UPGRADE ===
     [SerializeField] private int[] _upgradeCosts = { 100, 200 }; // Lv.2, Lv.3
     [SerializeField] private float _damageMultiplier = 1.5f;
     [SerializeField] private float _rangeMultiplier = 1.2f;
     [SerializeField] private float _fireRateMultiplier = 0.7f;
 
     // === RUNTIME ===
-    protected  int _currentLevel = 1;
-    protected  const int MAX_LEVEL = 3;
-    protected  float _currentPower;
-    protected  float _currentDistance;
-    protected  float _currentDelay;
-    protected  float _runningShootDelay;
-    protected  Enemy _targetEnemy;
-    protected  Quaternion _targetRotation;
-    protected  bool _isPlaced = false;
-    protected  float _baseShootDelay;
+    protected int _currentLevel = 1;
+    protected const int MAX_LEVEL = 3;
+    protected float _currentPower;
+    protected float _currentDistance;
+    protected float _currentDelay;
+    protected float _runningShootDelay;
+    protected Enemy _targetEnemy;
+    protected Quaternion _targetRotation;
+    protected bool _isPlaced = false;
+    protected float _baseShootDelay;
     public Vector2? PlacePosition { get; private set; }
     public int EnergyCost => _energyCost;
     public int CurrentLevel => _currentLevel;
@@ -46,10 +47,10 @@ public class Tower : MonoBehaviour
         return Mathf.Max(_shootDelay, 0.001f);
     }
     public int GetUpgradeCost() => _currentLevel < MAX_LEVEL ? _upgradeCosts[_currentLevel - 1] : 0;
-  
+
     // === BURN ===
     [HideInInspector] public bool IsBurning = false;
-    protected virtual void Start()  
+    protected virtual void Start()
     {
         ResetStats();
         _runningShootDelay = _currentDelay;
@@ -74,7 +75,7 @@ public class Tower : MonoBehaviour
         return _towerHead != null ? _towerHead.sprite : null;
     }
 
-    // === NÂNG CẤP ===
+    // === UPGRADE ===
     public bool CanUpgrade()
     {
         return _currentLevel < MAX_LEVEL &&
@@ -109,7 +110,8 @@ public class Tower : MonoBehaviour
             PlacePosition = null;
             gameObject.name = gameObject.name.Replace("(Clone)", "").Trim();
 
-            LevelManager.Instance?.AddEnergy(-EnergyCost);
+            // Logic giảm tiền khi đặt tháp đã được chuyển sang TowerUI.OnEndDrag
+            // Xóa dòng này nếu logic giảm tiền chỉ nằm trong TowerUI: LevelManager.Instance?.AddEnergy(-EnergyCost);
         }
     }
 
@@ -120,7 +122,10 @@ public class Tower : MonoBehaviour
         if (_towerHead != null) _towerHead.sortingOrder = order + 1;
     }
 
-    // === CLICK TO SHOW PANEL ===
+    // === CLICK/TAP TO SHOW PANEL (MOBILE READY) ===
+
+    // ** LOẠI BỎ HÀM UPDATE CŨ **
+    /*
     protected void Update()
     {
         if (!_isPlaced || !Input.GetMouseButtonDown(0)) return;
@@ -132,8 +137,23 @@ public class Tower : MonoBehaviour
             TowerInfoPanel.Instance?.ShowPanel(this, transform.position);
         }
     }
+    */
 
-    // === TOWER AI ===
+    // ** THAY THẾ BẰNG IPointerClickHandler **
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // Chỉ xử lý nếu tháp đã được đặt
+        if (!_isPlaced) return;
+
+        // Kiểm tra xem tap/click có phải từ UI không (EventSystem.current.IsPointerOverGameObject()) 
+        // Logic này chủ yếu được xử lý trong TowerInfoPanel.cs để ẩn panel.
+
+        // Chỉ cần hiển thị panel
+        TowerInfoPanel.Instance?.ShowPanel(this, transform.position);
+    }
+
+
+    // === TOWER AI (Giữ nguyên) ===
     public void CheckNearestEnemy()
     {
         if (!_isPlaced) return;
@@ -163,6 +183,7 @@ public class Tower : MonoBehaviour
         }
         _targetEnemy = nearest;
     }
+
     public void SeekTarget()
     {
         if (_targetEnemy == null || !_isPlaced || _towerHead == null) return;
@@ -175,7 +196,7 @@ public class Tower : MonoBehaviour
             _towerHead.transform.rotation, _targetRotation, Time.deltaTime * 180f);
     }
 
-    public virtual void ShootTarget()  
+    public virtual void ShootTarget()
     {
         if (_targetEnemy == null || !_isPlaced || _bulletPrefab == null) return;
         _runningShootDelay -= Time.deltaTime;
@@ -193,6 +214,7 @@ public class Tower : MonoBehaviour
 
         _runningShootDelay = _currentDelay;
     }
+
     private void OnDrawGizmosSelected()
     {
         if (_isPlaced)
@@ -203,6 +225,7 @@ public class Tower : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, _currentDistance);
         }
     }
+
     public float GetBaseShootDelay() => _baseShootDelay;
 
     public void SetShootDelay(float delay)
@@ -214,5 +237,12 @@ public class Tower : MonoBehaviour
     public void SetBurning(bool burning)
     {
         IsBurning = burning;
+    }
+
+    // Giữ lại Update trống để Tower AI vẫn chạy
+    protected void Update()
+    {
+        // Chạy các logic Tower AI trong Update hoặc FixedUpdate nếu cần
+        // Logic chọn tháp đã được chuyển sang OnPointerClick
     }
 }

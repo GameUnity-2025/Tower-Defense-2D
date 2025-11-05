@@ -3,13 +3,13 @@ using UnityEngine.SceneManagement;
 
 public class PlayAgain : MonoBehaviour
 {
-    // CHƠI LẠI LEVEL HIỆN TẠI
+    // REPLAY CURRENT LEVEL
     public void PlayAgainFuntion()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // CHUYỂN LEVEL TIẾP THEO (TỰ ĐỘNG)
+    // LOAD NEXT LEVEL (AUTOMATICALLY)
     public void NextLevel()
     {
         int currentLevel = SceneManager.GetActiveScene().buildIndex;
@@ -22,17 +22,17 @@ public class PlayAgain : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("Main"); // Về menu nếu hết level
+            SceneManager.LoadScene("Main"); // Back to menu if all levels are finished
         }
     }
 
-    // QUAY VỀ MENU CHÍNH
+    // BACK TO MAIN MENU
     public void BackToMain()
     {
         SceneManager.LoadScene("Main");
     }
 
-    // KIỂM TRA CẢNH CÓ TRONG BUILD SETTINGS
+    // CHECK IF SCENE EXISTS IN BUILD SETTINGS
     private bool SceneExistsInBuild(string sceneName)
     {
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)

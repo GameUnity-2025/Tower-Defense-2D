@@ -44,7 +44,7 @@ public class SettingController : MonoBehaviour
     {
         if (settingPanel == null) return;
         settingPanel.SetActive(true);
-        Time.timeScale = 0f; // Pause khi mở setting
+        Time.timeScale = 0f; // Pause when opening settings
     }
 
     public void CloseSetting()
@@ -52,7 +52,7 @@ public class SettingController : MonoBehaviour
         if (settingPanel != null)
         {
             settingPanel.SetActive(false);
-            Time.timeScale = speedLevels[currentSpeedIndex]; // Khôi phục tốc độ
+            Time.timeScale = speedLevels[currentSpeedIndex]; // Restore speed
         }
     }
 

@@ -23,27 +23,27 @@ public class InfoController : MonoBehaviour
     [SerializeField] private Sprite enemy1Sprite;
     [SerializeField] private Sprite enemy2Sprite;
     [SerializeField] private Button enemyTabButton;
-    [SerializeField] private Button towerTabButton; // Nút Tower
+    [SerializeField] private Button towerTabButton; // Tower Button
 
     private bool showingTowers = true;
 
     void Start()
     {
-        // Gán sự kiện cho các nút tháp
+        // Assign events to tower buttons
         tower1Button.onClick.AddListener(() => ShowTowerDetails(1));
         tower2Button.onClick.AddListener(() => ShowTowerDetails(2));
         tower3Button.onClick.AddListener(() => ShowTowerDetails(3));
         tower4Button.onClick.AddListener(() => ShowTowerDetails(4));
 
-        // Gán sự kiện cho các nút kẻ địch
+        // Assign events to enemy buttons
         enemy1Button.onClick.AddListener(() => ShowEnemyDetails(1));
         enemy2Button.onClick.AddListener(() => ShowEnemyDetails(2));
 
-        // Gán sự kiện cho nút Enemy và Tower
+        // Assign events to tab buttons
         enemyTabButton.onClick.AddListener(SwitchToEnemies);
         towerTabButton.onClick.AddListener(SwitchToTowers);
 
-        // Ẩn nút Tower ban đầu
+        // Hide the Tower button initially
         towerTabButton.gameObject.SetActive(false);
         enemyListPanel.SetActive(false);
         towerDetailPanel.SetActive(false);
@@ -58,11 +58,11 @@ public class InfoController : MonoBehaviour
             return;
         }
         infoPanel.SetActive(true);
-        towerListPanel.SetActive(true); // Hiển thị tháp ban đầu
+        towerListPanel.SetActive(true); // Show towers initially
         enemyListPanel.SetActive(false);
         towerDetailPanel.SetActive(false);
         showingTowers = true;
-        towerTabButton.gameObject.SetActive(false); // Ẩn nút Tower khi mở Info
+        towerTabButton.gameObject.SetActive(false); // Hide the Tower button when Info opens on Tower tab
     }
 
     public void HideInfo()
@@ -76,7 +76,7 @@ public class InfoController : MonoBehaviour
         enemyListPanel.SetActive(true);
         towerDetailPanel.SetActive(false);
         showingTowers = false;
-        towerTabButton.gameObject.SetActive(true); // Hiển thị nút Tower khi chuyển sang Enemy
+        towerTabButton.gameObject.SetActive(true); // Show Tower button when switched to Enemy
     }
 
     private void SwitchToTowers()
@@ -85,48 +85,48 @@ public class InfoController : MonoBehaviour
         towerListPanel.SetActive(true);
         towerDetailPanel.SetActive(false);
         showingTowers = true;
-        towerTabButton.gameObject.SetActive(false); // Ẩn nút Tower khi quay lại Tower
+        towerTabButton.gameObject.SetActive(false); // Hide Tower button when switched back to Tower
     }
 
     private void ShowTowerDetails(int towerId)
     {
-        if (!showingTowers) return; // Chỉ hiển thị nếu đang ở tab tháp
+        if (!showingTowers) return; // Only show if on the tower tab
         towerDetailPanel.SetActive(true);
         switch (towerId)
         {
             case 1:
                 towerDetailImage.sprite = tower1Sprite;
                 towerDetailText.text = "Tower 1: Basic Tower\n" +
-                                      "Health: 100\n" +
-                                      "Speed: 1.0s\n" +
-                                      "Damage: 10\n" +
-                                      "Special Ability: None";
+                                       "Health: 100\n" +
+                                       "Speed: 1.0s\n" +
+                                       "Damage: 10\n" +
+                                       "Special Ability: None";
                 break;
             case 2:
                 towerDetailImage.sprite = tower2Sprite;
                 towerDetailText.text = "Tower 2: Advanced Tower\n" +
-                                      "Health: 150\n" +
-                                      "Speed: 0.8s\n" +
-                                      "Damage: 20\n" +
-                                      "Special Ability: Splash Damage";
+                                       "Health: 150\n" +
+                                       "Speed: 0.8s\n" +
+                                       "Damage: 20\n" +
+                                       "Special Ability: Splash Damage";
                 break;
             case 3:
                 towerDetailImage.sprite = tower3Sprite;
                 towerDetailText.text = "Tower 3: Pro Tower\n" +
-                                      "Health: 200\n" +
-                                      "Speed: 0.6s\n" +
-                                      "Damage: 30\n" +
-                                      "Special Ability: Slow Enemy";
+                                       "Health: 200\n" +
+                                       "Speed: 0.6s\n" +
+                                       "Damage: 30\n" +
+                                       "Special Ability: Slow Enemy";
                 break;
             case 4:
                 if (PlayerPrefs.GetInt("UnlockedTower4", 0) == 1)
                 {
                     towerDetailImage.sprite = tower4Sprite;
                     towerDetailText.text = "Tower 4: Ultimate Tower\n" +
-                                          "Health: 300\n" +
-                                          "Speed: 0.4s\n" +
-                                          "Damage: 50\n" +
-                                          "Special Ability: Area Freeze";
+                                           "Health: 300\n" +
+                                           "Speed: 0.4s\n" +
+                                           "Damage: 50\n" +
+                                           "Special Ability: Area Freeze";
                 }
                 else
                 {
@@ -139,25 +139,25 @@ public class InfoController : MonoBehaviour
 
     private void ShowEnemyDetails(int enemyId)
     {
-        if (showingTowers) return; // Chỉ hiển thị nếu đang ở tab kẻ địch
+        if (showingTowers) return; // Only show if on the enemy tab
         towerDetailPanel.SetActive(true);
         switch (enemyId)
         {
             case 1:
                 towerDetailImage.sprite = enemy1Sprite;
                 towerDetailText.text = "Enemy 1: Basic Enemy\n" +
-                                      "Health: 50\n" +
-                                      "Speed: 1.0s\n" +
-                                      "Damage: 5\n" +
-                                      "Special Ability: None";
+                                       "Health: 50\n" +
+                                       "Speed: 1.0s\n" +
+                                       "Damage: 5\n" +
+                                       "Special Ability: None";
                 break;
             case 2:
                 towerDetailImage.sprite = enemy2Sprite;
                 towerDetailText.text = "Enemy 2: Advanced Enemy\n" +
-                                      "Health: 100\n" +
-                                      "Speed: 0.8s\n" +
-                                      "Damage: 10\n" +
-                                      "Special Ability: Armor";
+                                       "Health: 100\n" +
+                                       "Speed: 0.8s\n" +
+                                       "Damage: 10\n" +
+                                       "Special Ability: Armor";
                 break;
         }
     }

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System; // Cần thiết nếu chưa có
+using System;
+using UnityEngine.EventSystems; // Cần thiết để kiểm tra UI
 
 public class TowerInfoPanel : MonoBehaviour
 {
@@ -35,7 +36,7 @@ public class TowerInfoPanel : MonoBehaviour
         UpdateInfo(tower);
 
         Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
-        // GIỮ NGUYÊN VỊ TRÍ CŨ
+        // Position logic ( giữ nguyên )
 
         gameObject.SetActive(true);
     }
@@ -45,32 +46,29 @@ public class TowerInfoPanel : MonoBehaviour
         string displayName = tower.name.Replace("(Clone)", "").Trim();
         _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
 
-        // Sử dụng GetType().Name.Contains thay vì 'is FireTower' để tránh lỗi nếu tên class khác
         if (tower.GetType().Name.Contains("FireTower"))
         {
-            // ** CẬP NHẬT THÔNG TIN CHO FIRE TOWER (DOT) **
+            // Update info for Fire Tower (DOT)
             FireTower fireTower = tower as FireTower;
             if (fireTower != null)
             {
-                // GỌI CÁC HÀM GET MỚI ĐỂ LẤY CHỈ SỐ TỪ PREFAB FIRE BULLET
                 float dps = fireTower.GetCurrentBurnDPS();
                 float duration = fireTower.GetCurrentBurnDuration();
 
-                _damageText.text = $"Burn DPS: {dps:F1}"; // Hiển thị DPS
-                _rangeText.text = $"Burn Duration: {duration:F1}s"; // Hiển thị Duration
+                _damageText.text = $"Burn DPS: {dps:F1}";
+                _rangeText.text = $"Burn Duration: {duration:F1}s";
                 _fireRateText.text = $"Rate: {1f / fireTower.GetShootDelay():F2}/s";
             }
         }
         else
         {
-            // Tháp thông thường
+            // Normal Tower
             _damageText.text = $"Damage: {tower.GetShootPower()}";
             _rangeText.text = $"Range: {tower.GetShootDistance():F1}";
             _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s";
         }
-        // **------------------------------------------**
 
-        // === NÚT NÂNG CẤP ===
+        // === UPGRADE BUTTON ===
         if (tower.CurrentLevel < 3)
         {
             int cost = tower.GetUpgradeCost();
@@ -80,7 +78,7 @@ public class TowerInfoPanel : MonoBehaviour
             _upgradeButton.onClick.AddListener(() =>
             {
                 tower.Upgrade();
-                UpdateInfo(tower); // CẬP NHẬT LẠI UI sau khi nâng cấp
+                UpdateInfo(tower);
             });
         }
         else
@@ -89,21 +87,21 @@ public class TowerInfoPanel : MonoBehaviour
             _upgradeButton.GetComponentInChildren<TMP_Text>().text = "MAX";
         }
 
-        // === NÚT BÁN ===
+        // === SELL BUTTON ===
         _sellButton.onClick.RemoveAllListeners();
         _sellButton.onClick.AddListener(() =>
         {
-            // Giả định LevelManager tồn tại và có RegisterSpawnedTowerRemoval
             if (LevelManager.Instance != null)
             {
                 int refund = tower.EnergyCost / 2;
                 LevelManager.Instance.AddEnergy(refund);
-                LevelManager.Instance.RegisterSpawnedTowerRemoval(tower); // Đảm bảo gọi hàm này
+                LevelManager.Instance.RegisterSpawnedTowerRemoval(tower);
             }
             Destroy(tower.gameObject);
             HidePanel();
         });
     }
+
     public void HidePanel()
     {
         gameObject.SetActive(false);
@@ -118,27 +116,54 @@ public class TowerInfoPanel : MonoBehaviour
         bool canUpgrade = _currentTower.CanUpgrade();
         _upgradeButton.interactable = canUpgrade;
 
-        // Cập nhật text để hiển thị chi phí và trạng thái
         _upgradeButton.GetComponentInChildren<TMP_Text>().text = $"Upgrade ({cost})";
     }
 
     private void Update()
     {
-        // 1. Click ngoài → ẩn panel
-        if (Input.GetMouseButtonDown(0) && gameObject.activeSelf)
+        // 1. Click/Tap outside -> hide panel
+        if (gameObject.activeSelf && (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)))
         {
-            if (!RectTransformUtility.RectangleContainsScreenPoint(
-                (RectTransform)transform, Input.mousePosition, Camera.main))
+            Vector2 screenPoint = Input.mousePosition;
+
+            // Use touch position if available
+            if (Input.touchCount > 0)
             {
-                HidePanel();
-                return;
+                screenPoint = Input.GetTouch(0).position;
+            }
+
+            // Check if the click/tap occurred outside the panel's RectTransform
+            if (!RectTransformUtility.RectangleContainsScreenPoint(
+                (RectTransform)transform, screenPoint, Camera.main))
+            {
+                // ** IMPORTANT MOBILE CHECK: Is the tap over any other UI element? **
+                // This prevents hiding the panel when tapping on other UI buttons (e.g., TowerUI buttons)
+                if (!EventSystem.current.IsPointerOverGameObject())
+                {
+                    // If it's not over any UI, check if it's over the current tower itself
+                    if (_currentTower != null && _currentTower.gameObject.GetComponent<Collider2D>() != null)
+                    {
+                        // Check if the tap is NOT on the tower's collider
+                        Vector3 worldPoint = Camera.main.ScreenToWorldPoint(screenPoint);
+                        Collider2D hitCollider = Physics2D.OverlapPoint(worldPoint);
+
+                        if (hitCollider != null && hitCollider.gameObject == _currentTower.gameObject)
+                        {
+                            // We clicked the tower itself, do not hide (it will re-open the panel)
+                            return;
+                        }
+                    }
+
+                    // If it passed all checks (outside the panel AND not on the tower/other UI)
+                    HidePanel();
+                }
             }
         }
 
-        // 2. TỰ CẬP NHẬT NÚT UPGRADE MỖI FRAME
+        // 2. AUTO UPDATE UPGRADE BUTTON 
         if (_currentTower != null && gameObject.activeSelf)
         {
-            UpdateUpgradeButton(); // GỌI MỖI FRAME để kiểm tra đủ tiền hay không
+            UpdateUpgradeButton();
         }
     }
 }

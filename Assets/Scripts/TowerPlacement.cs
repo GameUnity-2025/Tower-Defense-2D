@@ -11,6 +11,8 @@ public class TowerPlacement : MonoBehaviour
         if (_placedTower != null) return;
 
         Tower tower = collision.GetComponent<Tower>();
+        // The check for CanPlaceTower should ideally happen in TowerUI/LevelManager 
+        // to prevent spawning, but this is a good safety check for placement validation.
         if (tower != null && LevelManager.Instance.CanPlaceTower(tower))
         {
             tower.SetPlacePosition(transform.position);

@@ -13,11 +13,11 @@ public class LevelSelectController : MonoBehaviour
 
     void Start()
     {
-     
+        // Load the highest unlocked level saved by PlayerPrefs
         int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
         Debug.Log($"[LevelSelect] Unlocked up to Level {unlockedLevel}");
 
-        
+        // Assign listeners to buttons
         level1Button.onClick.AddListener(() => LoadLevel(1));
         level2Button.onClick.AddListener(() => LoadLevel(2));
         level3Button.onClick.AddListener(() => LoadLevel(3));
@@ -25,7 +25,7 @@ public class LevelSelectController : MonoBehaviour
         level5Button.onClick.AddListener(() => LoadLevel(5));
         level6Button.onClick.AddListener(() => LoadLevel(6));
 
-        
+        // Set button interactivity based on unlocked level
         level1Button.interactable = true;
         level2Button.interactable = unlockedLevel >= 2;
         level3Button.interactable = unlockedLevel >= 3;
@@ -38,7 +38,7 @@ public class LevelSelectController : MonoBehaviour
     {
         string sceneName = "Level" + level;
 
-       
+        // Check if the scene is in Build Settings before loading
         if (SceneExistsInBuild(sceneName))
         {
             SceneManager.LoadScene(sceneName);
@@ -49,7 +49,7 @@ public class LevelSelectController : MonoBehaviour
         }
     }
 
-    
+    // Check if the scene exists in Build Settings
     bool SceneExistsInBuild(string sceneName)
     {
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
@@ -64,7 +64,7 @@ public class LevelSelectController : MonoBehaviour
 
     public void OnBackButtonClicked()
     {
-        Time.timeScale = 1f; 
-        SceneManager.LoadScene("Main"); 
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Main");
     }
 }
