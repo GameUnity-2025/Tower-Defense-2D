@@ -43,19 +43,21 @@ public class Enemy : MonoBehaviour
 
         IsBurning = false;
         _burnTimer = 0f;
+        _damagePerSecond = 0f; // Reset DPS
         _damageAccumulator = 0f;
     }
 
     protected virtual void Update()
     {
+        // Cập nhật vị trí thanh máu
         if (_healthBar != null)
         {
             _healthBar.transform.position = transform.position + new Vector3(0, 0.5f, 0);
         }
 
+        // --- LOGIC SÁT THƯƠNG THEO THỜI GIAN (DOT) ---
         if (IsBurning)
         {
-
             _damageAccumulator += _damagePerSecond * Time.deltaTime;
 
             if (_damageAccumulator >= 1f)
@@ -64,7 +66,7 @@ public class Enemy : MonoBehaviour
                 ReduceEnemyHealth(burnDmg);
                 _damageAccumulator -= burnDmg;
             }
-
+      
             _burnTimer -= Time.deltaTime;
 
             if (_burnTimer <= 0)
@@ -80,6 +82,7 @@ public class Enemy : MonoBehaviour
                 _damageAccumulator = 0f;
             }
         }
+        // ------------------------------------------------
     }
 
 
@@ -104,14 +107,17 @@ public class Enemy : MonoBehaviour
 
     public virtual void ReduceEnemyHealth(int damage)
     {
+        if (damage <= 0) return; 
+
+        
         _currentHealth -= damage;
-         AudioPlayer.Instance?.PlaySFX("hit-enemy");
-        if (damage > 0f)
-        {
-            LevelManager.Instance.ShowDamageText(damage, transform.position);
-        }
-        int intDamage = Mathf.CeilToInt(damage); 
-        _currentHealth -= intDamage;
+
+        AudioPlayer.Instance?.PlaySFX("hit-enemy");
+
+    
+        LevelManager.Instance.ShowDamageText(damage, transform.position);
+
+
         if (_currentHealth <= 0)
         {
             Die();
@@ -128,8 +134,8 @@ public class Enemy : MonoBehaviour
         StopBurnEffect();
 
         gameObject.SetActive(false);
-         AudioPlayer.Instance?.PlaySFX("enemy-die");
-         LevelManager.Instance?.AddEnergy(20); 
+        AudioPlayer.Instance?.PlaySFX("enemy-die");
+        LevelManager.Instance?.AddEnergy(20);
         LevelManager.Instance?.CheckWinCondition();
     }
 
@@ -148,6 +154,7 @@ public class Enemy : MonoBehaviour
         _healthFill.transform.localPosition = position;
     }
 
+    // --- LOGIC HIỆU ỨNG DOT ---
 
     public void SetBurning(bool burning)
     {
@@ -156,7 +163,9 @@ public class Enemy : MonoBehaviour
 
     public void ApplyBurnEffect(float duration, float damagePerSecond)
     {
+     
         _burnTimer = Mathf.Max(_burnTimer, duration);
+
 
         _damagePerSecond = damagePerSecond;
 
@@ -173,6 +182,7 @@ public class Enemy : MonoBehaviour
     {
         if (_burnEffectPrefab != null && _activeBurnEffect == null)
         {
+         
             _activeBurnEffect = Instantiate(_burnEffectPrefab, transform.position, Quaternion.identity, transform);
 
             ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
@@ -192,11 +202,15 @@ public class Enemy : MonoBehaviour
             ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
             if (ps != null)
             {
-                var main = ps.main;
-                main.loop = false;
+               
                 var emission = ps.emission;
                 emission.enabled = false;
+
+          
+                var main = ps.main;
+                main.loop = false;
             }
+
 
             Destroy(_activeBurnEffect, 2f);
             _activeBurnEffect = null;

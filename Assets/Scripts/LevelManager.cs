@@ -70,7 +70,31 @@ public class LevelManager : MonoBehaviour
         _runningSpawnDelay = _spawnDelay;
 
         if (_panel != null) _panel.SetActive(false);
+        InitializeExistingTowers();
     }
+
+    private void InitializeExistingTowers()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == 1) 
+        {
+            Tower[] existingTowers = FindObjectsOfType<Tower>();
+
+            foreach (Tower t in existingTowers)
+            {
+                if (!_spawnedTowers.Contains(t))
+                {
+
+                    RegisterSpawnedTower(t);
+                    if (t.PlacePosition == null)
+                    {
+                        t.SetPlacePosition(t.transform.position);
+                    }
+                    t.LockPlacement(); 
+                }
+            }
+        }
+    }
+
 
     private void Update()
     {

@@ -106,13 +106,11 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
         if (PlacePosition.HasValue)
         {
             transform.position = PlacePosition.Value;
-            _isPlaced = true;
             PlacePosition = null;
-            gameObject.name = gameObject.name.Replace("(Clone)", "").Trim();
-
-            // Logic giảm tiền khi đặt tháp đã được chuyển sang TowerUI.OnEndDrag
-            // Xóa dòng này nếu logic giảm tiền chỉ nằm trong TowerUI: LevelManager.Instance?.AddEnergy(-EnergyCost);
         }
+        _isPlaced = true;
+        gameObject.name = gameObject.name.Replace("(Clone)", "").Trim();
+        LevelManager.Instance?.RegisterSpawnedTower(this); 
     }
 
     public void ToggleOrderInLayer(bool toFront)
@@ -142,13 +140,24 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
     // ** THAY THẾ BẰNG IPointerClickHandler **
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Chỉ xử lý nếu tháp đã được đặt
-        if (!_isPlaced) return;
+        // Debug 1: Xác nhận tháp nhận được click
+        Debug.Log($"[TOWER TAP] Tower: {gameObject.name} clicked/tapped. _isPlaced: {_isPlaced}");
 
-        // Kiểm tra xem tap/click có phải từ UI không (EventSystem.current.IsPointerOverGameObject()) 
-        // Logic này chủ yếu được xử lý trong TowerInfoPanel.cs để ẩn panel.
+        if (!_isPlaced)
+        {
+            Debug.LogWarning($"[TOWER TAP] Tower: {gameObject.name} is NOT placed. Panel blocked.");
+            return;
+        }
 
-        // Chỉ cần hiển thị panel
+        // Debug 2: Kiểm tra tham chiếu Singleton
+        if (TowerInfoPanel.Instance == null)
+        {
+            Debug.LogError("TowerInfoPanel.Instance IS NULL in OnPointerClick! Panel cannot show.");
+            return;
+        }
+
+        // Debug 3: Xác nhận panel được gọi
+        Debug.Log($"[TOWER TAP] Success! Calling ShowPanel for: {gameObject.name}");
         TowerInfoPanel.Instance?.ShowPanel(this, transform.position);
     }
 

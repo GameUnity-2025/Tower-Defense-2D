@@ -35,10 +35,17 @@ public class TowerInfoPanel : MonoBehaviour
         _currentTower = tower;
         UpdateInfo(tower);
 
-        Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
-        // Position logic ( giữ nguyên )
+        // Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition); // Bỏ comment
+        // // Position logic ( giữ nguyên ) // Bỏ comment/Xóa
 
+        // Debug 4: Xác nhận Panel nhận được lệnh hiển thị
+        Debug.Log($"[PANEL SHOW] Attempting to show Panel for: {tower.name}");
+
+        // Ép Panel hiển thị ngay tại điểm Neo (Middle Center)
         gameObject.SetActive(true);
+
+        // Debug 5: Kiểm tra trạng thái cuối cùng
+        Debug.Log($"[PANEL SHOW] Panel GameObject Active: {gameObject.activeSelf}");
     }
 
     private void UpdateInfo(Tower tower)
