@@ -20,7 +20,6 @@ public class LevelManager : MonoBehaviour
     /* ---------- UI & TOWERS ---------- */
     [SerializeField] private Transform _towerUIParent;
     [SerializeField] private GameObject _towerUIPrefab;
-    [SerializeField] private Tower[] _towerPrefabs;
     private List<Tower> _spawnedTowers = new List<Tower>();
     [SerializeField] private GameObject _damageTextPrefab;
     [SerializeField] private Transform _damageTextContainer;
@@ -248,15 +247,25 @@ public class LevelManager : MonoBehaviour
     /* ============================================================= */
     private void InstantiateAllTowerUI()
     {
-        foreach (Tower t in _towerPrefabs)
+        
+        Tower[] presetTowers = TowerPresetManager.Instance?.GetCurrentTowerPreset();
+
+        if (presetTowers == null || presetTowers.Length == 0)
         {
+            Debug.LogError("Tower Preset Manager not found or preset is empty! Check Menu Scene configuration.");
+            
+            return;
+        }
+        foreach (Tower t in presetTowers)
+        {
+            if (t == null) continue; 
+
             GameObject ui = Instantiate(_towerUIPrefab, _towerUIParent);
             TowerUI tui = ui.GetComponent<TowerUI>();
             tui.SetTowerPrefab(t);
             ui.name = t.name;
         }
     }
-
     public void RegisterSpawnedTower(Tower t) => _spawnedTowers.Add(t);
     public void RegisterSpawnedTowerRemoval(Tower tower) => _spawnedTowers.Remove(tower);
 
@@ -314,6 +323,13 @@ public class LevelManager : MonoBehaviour
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
                 PlayerPrefs.Save();
             }
+            int maxCompletedLevel = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
+            if (currentLevel > maxCompletedLevel)
+            {
+                PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
+            }
+
+            PlayerPrefs.Save();
         }
     }
 

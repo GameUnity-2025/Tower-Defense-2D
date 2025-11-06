@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿// TowerInfoPanel.cs
+
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using UnityEngine.EventSystems; // Cần thiết để kiểm tra UI
+using UnityEngine.EventSystems;
+using System.Collections; // Vẫn giữ để đề phòng có các logic Coroutine khác
 
 public class TowerInfoPanel : MonoBehaviour
 {
@@ -35,17 +38,9 @@ public class TowerInfoPanel : MonoBehaviour
         _currentTower = tower;
         UpdateInfo(tower);
 
-        // Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition); // Bỏ comment
-        // // Position logic ( giữ nguyên ) // Bỏ comment/Xóa
+        // Position logic (nếu có)
 
-        // Debug 4: Xác nhận Panel nhận được lệnh hiển thị
-        Debug.Log($"[PANEL SHOW] Attempting to show Panel for: {tower.name}");
-
-        // Ép Panel hiển thị ngay tại điểm Neo (Middle Center)
         gameObject.SetActive(true);
-
-        // Debug 5: Kiểm tra trạng thái cuối cùng
-        Debug.Log($"[PANEL SHOW] Panel GameObject Active: {gameObject.activeSelf}");
     }
 
     private void UpdateInfo(Tower tower)
@@ -53,9 +48,9 @@ public class TowerInfoPanel : MonoBehaviour
         string displayName = tower.name.Replace("(Clone)", "").Trim();
         _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
 
+        // Logic cập nhật thông tin (FireTower vs Normal Tower)
         if (tower.GetType().Name.Contains("FireTower"))
         {
-            // Update info for Fire Tower (DOT)
             FireTower fireTower = tower as FireTower;
             if (fireTower != null)
             {
@@ -69,7 +64,6 @@ public class TowerInfoPanel : MonoBehaviour
         }
         else
         {
-            // Normal Tower
             _damageText.text = $"Damage: {tower.GetShootPower()}";
             _rangeText.text = $"Range: {tower.GetShootDistance():F1}";
             _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s";
@@ -128,46 +122,10 @@ public class TowerInfoPanel : MonoBehaviour
 
     private void Update()
     {
-        // 1. Click/Tap outside -> hide panel
-        if (gameObject.activeSelf && (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)))
-        {
-            Vector2 screenPoint = Input.mousePosition;
+        // LOGIC TỰ ĐỘNG ĐÓNG PANEL KHI CLICK BÊN NGOÀI ĐÃ BỊ LOẠI BỎ.
+        // PANEL CHỈ ĐÓNG KHI NHẤN NÚT CLOSE HOẶC SELL.
 
-            // Use touch position if available
-            if (Input.touchCount > 0)
-            {
-                screenPoint = Input.GetTouch(0).position;
-            }
-
-            // Check if the click/tap occurred outside the panel's RectTransform
-            if (!RectTransformUtility.RectangleContainsScreenPoint(
-                (RectTransform)transform, screenPoint, Camera.main))
-            {
-                // ** IMPORTANT MOBILE CHECK: Is the tap over any other UI element? **
-                // This prevents hiding the panel when tapping on other UI buttons (e.g., TowerUI buttons)
-                if (!EventSystem.current.IsPointerOverGameObject())
-                {
-                    // If it's not over any UI, check if it's over the current tower itself
-                    if (_currentTower != null && _currentTower.gameObject.GetComponent<Collider2D>() != null)
-                    {
-                        // Check if the tap is NOT on the tower's collider
-                        Vector3 worldPoint = Camera.main.ScreenToWorldPoint(screenPoint);
-                        Collider2D hitCollider = Physics2D.OverlapPoint(worldPoint);
-
-                        if (hitCollider != null && hitCollider.gameObject == _currentTower.gameObject)
-                        {
-                            // We clicked the tower itself, do not hide (it will re-open the panel)
-                            return;
-                        }
-                    }
-
-                    // If it passed all checks (outside the panel AND not on the tower/other UI)
-                    HidePanel();
-                }
-            }
-        }
-
-        // 2. AUTO UPDATE UPGRADE BUTTON 
+        // Tự động cập nhật nút Upgrade
         if (_currentTower != null && gameObject.activeSelf)
         {
             UpdateUpgradeButton();
