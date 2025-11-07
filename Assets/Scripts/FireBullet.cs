@@ -21,9 +21,7 @@ public class FireBullet : Bullet
     private float _travelledDistance = 0f;
     private float _lastDamageTime = 0f;
     private Vector2 _direction;
-    private int _debugDamageCount = 0;
 
-    // Property chỉ đọc để tính DPS/Duration dựa trên cấp độ hiện tại
     private float CurrentBurnDPS => GetDPSForLevel(_towerLevel);
     private float CurrentBurnDuration => GetDurationForLevel(_towerLevel);
 
@@ -52,18 +50,14 @@ public class FireBullet : Bullet
     protected override void OnEnable()
     {
         base.OnEnable();
-        // RẤT QUAN TRỌNG: Loại bỏ logic tìm kiếm mục tiêu của Bullet
         _targetEnemy = null;
 
         _direction = transform.up;
         _travelledDistance = 0f;
         _lastDamageTime = 0f;
-        _debugDamageCount = 0;
     }
 
-    /// <summary>
-    /// Được FireTower gọi để thiết lập cấp độ tháp đã bắn ra viên đạn này.
-    /// </summary>
+
     public void SetTowerLevel(int level)
     {
         _towerLevel = level;
@@ -98,7 +92,6 @@ public class FireBullet : Bullet
             Enemy enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
             {
-                // ** SỬ DỤNG GIÁ TRỊ TỰ TÍNH TOÁN **
                 enemy.ApplyBurnEffect(CurrentBurnDuration, CurrentBurnDPS);
             }
         }
@@ -109,7 +102,7 @@ public class FireBullet : Bullet
 
         Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
 
-        Gizmos.DrawSphere(transform.position, _damageRadius); // Vẽ vòng tròn này
+        Gizmos.DrawSphere(transform.position, _damageRadius); 
 
     }
 

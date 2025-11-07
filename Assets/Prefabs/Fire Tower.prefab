@@ -277,6 +277,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6413046108515076153}
+    - targetCorrespondingSourceObject: {fileID: 8124858492870805638, guid: fc3f2c1e6a34b51408c68254a94fb798,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -6060839321745496192}
   m_SourcePrefab: {fileID: 100100000, guid: fc3f2c1e6a34b51408c68254a94fb798, type: 3}
 --- !u!1 &2687261761282346608 stripped
 GameObject:
@@ -350,6 +354,19 @@ MonoBehaviour:
   _flameSpreadAngle: 40
   _flameBurstDelay: 0.1
   _flameParticleScale: 1
+--- !u!114 &-6060839321745496192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2687261761282346608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f1f11c93d784c498e203b0f08945ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _requiredLevel: 10
 --- !u!212 &5822840326096597080 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 379634946502194862, guid: fc3f2c1e6a34b51408c68254a94fb798,

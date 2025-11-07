@@ -122,10 +122,6 @@ public class TowerInfoPanel : MonoBehaviour
 
     private void Update()
     {
-        // LOGIC TỰ ĐỘNG ĐÓNG PANEL KHI CLICK BÊN NGOÀI ĐÃ BỊ LOẠI BỎ.
-        // PANEL CHỈ ĐÓNG KHI NHẤN NÚT CLOSE HOẶC SELL.
-
-        // Tự động cập nhật nút Upgrade
         if (_currentTower != null && gameObject.activeSelf)
         {
             UpdateUpgradeButton();

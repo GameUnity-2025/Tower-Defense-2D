@@ -27,20 +27,28 @@ public class TowerSelectionPanel : MonoBehaviour
 
     private void InitializeTowerList()
     {
-        if (TowerPresetManager.Instance == null) return;
-
         foreach (Transform child in _allTowerListContainer.transform)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (Tower tower in TowerPresetManager.Instance.GetAllTowerPrefabs())
+        List<TowerPresetManager.TowerUnlockData> allTowerData =
+            TowerPresetManager.Instance.GetAllTowerUnlockData();
+
+        foreach (TowerPresetManager.TowerUnlockData towerData in allTowerData)
         {
-            GameObject itemGO = Instantiate(_towerDragItemPrefab, _allTowerListContainer.transform);
-            TowerDragItem dragItem = itemGO.GetComponent<TowerDragItem>();
+            Tower towerPrefab = towerData.towerPrefab;
+
+            if (towerPrefab == null) continue;
+            (bool isUnlocked, int requiredLevel) status =
+                TowerPresetManager.Instance.GetUnlockStatus(towerPrefab);
+            GameObject go = Instantiate(_towerDragItemPrefab, _allTowerListContainer.transform);
+
+            TowerDragItem dragItem = go.GetComponent<TowerDragItem>();
+
             if (dragItem != null)
             {
-                dragItem.SetTower(tower);
+                dragItem.Setup(towerPrefab, status.isUnlocked, status.requiredLevel);
             }
         }
     }

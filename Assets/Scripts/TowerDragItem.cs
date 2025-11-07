@@ -2,20 +2,25 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro; // Thêm thư viện Text Mesh Pro cho requiredLevelText
 
 public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    // Tháp mà icon này đại diện (được gán khi tạo danh sách)
+    // Tháp mà icon này đại diện
     [HideInInspector] public Tower TowerPrefab;
+
+    [Header("Unlock Status UI")]
+    [SerializeField] private Image _lockOverlay;
+    [SerializeField] private TMP_Text _requiredLevelText; // Sử dụng TMP_Text
 
     private Image _image;
     private Transform _originalParent;
     private CanvasGroup _canvasGroup;
+    private bool _isLocked = false; // Trạng thái khóa
 
     void Awake()
     {
         _image = GetComponent<Image>();
-        // Cần CanvasGroup để làm mờ và tạm tắt Raycast
         _canvasGroup = GetComponent<CanvasGroup>();
         if (_canvasGroup == null)
         {
@@ -23,43 +28,77 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    public void SetTower(Tower tower)
+    // Hàm Setup mới, được gọi từ TowerSelectionPanel
+    public void Setup(Tower towerPrefab, bool isUnlocked, int requiredLevel)
     {
-        TowerPrefab = tower;
-        if (tower != null)
+        TowerPrefab = towerPrefab;
+        _isLocked = !isUnlocked;
+
+        if (towerPrefab != null)
         {
-            _image.sprite = tower.GetTowerHeadIcon();
+            _image.sprite = towerPrefab.GetTowerHeadIcon();
             _image.enabled = true;
         }
         else
         {
             _image.enabled = false;
         }
+
+        // Cập nhật trạng thái và hiển thị UI
+        if (_lockOverlay != null)
+        {
+            _lockOverlay.gameObject.SetActive(_isLocked);
+        }
+
+        if (_requiredLevelText != null)
+        {
+            _requiredLevelText.text = $"Lv {requiredLevel}";
+            _requiredLevelText.gameObject.SetActive(_isLocked);
+        }
+
+        // Điều chỉnh màu sắc icon nếu bị khóa
+        if (_image != null)
+        {
+            _image.color = _isLocked ? new Color(0.5f, 0.5f, 0.5f, 0.7f) : Color.white;
+        }
     }
+
+    // --- Các sự kiện Kéo Thả ---
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (_isLocked)
+        {
+            // Không cho phép kéo nếu bị khóa
+            return;
+        }
+
         _originalParent = transform.parent;
-        // Di chuyển icon lên cấp cao nhất của Canvas để luôn nằm trên các UI khác
         transform.SetParent(transform.root);
 
-        _canvasGroup.alpha = 0.6f; // Làm mờ nhẹ
-        _canvasGroup.blocksRaycasts = false; // Tắt raycast để OnDrop hoạt động
+        _canvasGroup.alpha = 0.6f;
+        _canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        // Di chuyển theo vị trí con trỏ/ngón tay
+        if (_isLocked)
+        {
+            return;
+        }
         transform.position = eventData.position;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        // Trở về trạng thái ban đầu
+        if (_isLocked)
+        {
+            return;
+        }
+
         _canvasGroup.alpha = 1f;
         _canvasGroup.blocksRaycasts = true;
 
-        // Nếu không thả vào PresetSlot nào, trả về vị trí ban đầu
         transform.SetParent(_originalParent);
         transform.localPosition = Vector3.zero;
     }
