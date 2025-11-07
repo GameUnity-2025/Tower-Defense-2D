@@ -28,11 +28,12 @@ public class Bullet : MonoBehaviour
             Vector3 targetPosition = _targetEnemy.transform.position;
             Vector3 currentPosition = transform.position;
 
-            // KIỂM TRA VA CHẠM SỚM (Ưu tiên Fix lỗi trên Mobile)
+            // KIỂM TRA VA CHẠM SỚM (Fix lỗi trên Mobile)
             float distanceToTarget = Vector3.Distance(currentPosition, targetPosition);
             float hitThreshold = _bulletSpeed * Time.fixedDeltaTime;
 
-            if (distanceToTarget <= hitThreshold) // Nếu đạn đã đủ gần (trong khoảng di chuyển tiếp theo)
+            // Lỗi CS0103 xảy ra tại đây (Dòng 37 trong code cũ)
+            if (distanceToTarget <= hitThreshold)
             {
                 HitTarget();
                 return;
@@ -53,8 +54,9 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    // HÀM GÂY SÁT THƯƠNG VÀ KẾT THÚC VÒNG ĐỜI ĐẠN (Đã sửa lỗi CS0103)
-    private void HitTarget()
+    // HÀM GÂY SÁT THƯƠNG VÀ KẾT THÚC VÒNG ĐỜI ĐẠN
+    // Sửa lỗi CS0106 và CS1520: Đã thêm 'void' và đặt hàm ngoài FixedUpdate.
+    protected virtual void HitTarget()
     {
         if (_targetEnemy == null || !_targetEnemy.gameObject.activeSelf)
         {
@@ -63,10 +65,9 @@ public class Bullet : MonoBehaviour
             return;
         }
 
-        // Splash damage
+        // Logic sát thương SPLASH hoặc SÁT THƯƠNG ĐƠN
         if (_bulletSplashRadius > 0f)
         {
-            // LevelManager.Instance.ExplodeAt (giả sử hàm này tồn tại)
             LevelManager.Instance.ExplodeAt(transform.position, _bulletSplashRadius, _bulletPower);
         }
         else
@@ -82,7 +83,7 @@ public class Bullet : MonoBehaviour
     // OnTriggerEnter2D chỉ còn là cơ chế dự phòng
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // GỌI HitTarget nếu va chạm là mục tiêu đã định
+        // Lỗi CS0103 xảy ra tại đây (Dòng 88 trong code cũ)
         if (_targetEnemy != null && collision.gameObject.Equals(_targetEnemy.gameObject))
         {
             HitTarget();
