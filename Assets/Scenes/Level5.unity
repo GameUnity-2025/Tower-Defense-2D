@@ -3784,7 +3784,6 @@ GameObject:
   - component: {fileID: 1047872025}
   - component: {fileID: 1047872027}
   - component: {fileID: 1047872026}
-  - component: {fileID: 1047872028}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -3856,23 +3855,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1047872024}
   m_CullTransparentMesh: 0
---- !u!114 &1047872028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1047872024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23bf316737d32aa498715c77add7cc9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _unlockedTowerPrefab: {fileID: 2405443755552656510, guid: 1866cb5b18cfb1442b96754c02f8e807,
-    type: 3}
-  _unlockNotificationPanel: {fileID: 1047872024}
-  _towerImageUI: {fileID: 1625436966}
-  _messageTextUI: {fileID: 1529059475}
 --- !u!1 &1061097092
 GameObject:
   m_ObjectHideFlags: 0
@@ -5344,13 +5326,12 @@ MonoBehaviour:
   _bossPrefab: {fileID: 4472615827600906362, guid: ce427d507ec202044a3001a1e277fc1a,
     type: 3}
   _maxLives: 5
-  _totalEnemy: 20
+  _totalEnemy: 2
   _panel: {fileID: 1047872024}
   _statusInfo: {fileID: 2139557043}
   _livesInfo: {fileID: 776985991}
   _totalEnemyInfo: {fileID: 1378185555}
   _energyInfo: {fileID: 471248737}
-  _victoryPanelUI: {fileID: 1047872028}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20

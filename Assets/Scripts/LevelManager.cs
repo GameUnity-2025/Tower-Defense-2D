@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class LevelManager : MonoBehaviour
 {
@@ -35,16 +36,19 @@ public class LevelManager : MonoBehaviour
     private List<Bullet> _spawnedBullets = new List<Bullet>();
     public List<Enemy> GetEnemies() => _spawnedEnemies;
 
+    // ** KHAI BÁO BIẾN ĐẾM MỚI **
+    private int _activeEnemyCount = 0;
+    private bool _isBossActive = false;
+
     /* ---------- GAME STATE ---------- */
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3;
     [SerializeField] private int _totalEnemy = 15;
-    [SerializeField] private GameObject _panel;
+    [SerializeField] private GameObject _panel; // Panel Game Over/Victory
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
-    [SerializeField] private VictoryPanelUI _victoryPanelUI;
 
     private int _currentLives;
     private int _enemyCounter;
@@ -68,14 +72,22 @@ public class LevelManager : MonoBehaviour
         SetEnergy(_currentEnergy);
         InstantiateAllTowerUI();
         _runningSpawnDelay = _spawnDelay;
+        _hasBossSpawned = false;
+        IsOver = false;
+
+        // ** KHỞI TẠO BIẾN ĐẾM **
+        _activeEnemyCount = 0;
+        _isBossActive = false;
 
         if (_panel != null) _panel.SetActive(false);
         InitializeExistingTowers();
+        // ** Đảm bảo Time.timeScale được đặt về 1 khi bắt đầu màn chơi **
+        Time.timeScale = 1f;
     }
 
     private void InitializeExistingTowers()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 1) 
+        if (SceneManager.GetActiveScene().buildIndex == 1)
         {
             Tower[] existingTowers = FindObjectsOfType<Tower>();
 
@@ -83,13 +95,12 @@ public class LevelManager : MonoBehaviour
             {
                 if (!_spawnedTowers.Contains(t))
                 {
-
                     RegisterSpawnedTower(t);
                     if (t.PlacePosition == null)
                     {
                         t.SetPlacePosition(t.transform.position);
                     }
-                    t.LockPlacement(); 
+                    t.LockPlacement();
                 }
             }
         }
@@ -98,7 +109,6 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
-        // ** LOGIC NÀY ĐƯỢC GIỮ LẠI CHO DEBUG/PC. KHÔNG ẢNH HƯỞNG ĐẾN MOBILE. **
         if (Input.GetKeyDown(KeyCode.R))
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
@@ -124,10 +134,13 @@ public class LevelManager : MonoBehaviour
             t.ShootTarget();
         }
 
-        // ENEMIES
-        foreach (Enemy e in _spawnedEnemies)
+        // ENEMIES (Sử dụng for ngược để tránh InvalidOperationException)
+        for (int i = _spawnedEnemies.Count - 1; i >= 0; i--)
         {
+            Enemy e = _spawnedEnemies[i];
+
             if (!e.gameObject.activeSelf) continue;
+
             if (Vector2.Distance(e.transform.position, e.TargetPosition) < 0.1f)
             {
                 e.SetCurrentPathIndex(e.CurrentPathIndex + 1);
@@ -135,19 +148,33 @@ public class LevelManager : MonoBehaviour
                     e.SetTargetPosition(_enemyPaths[e.CurrentPathIndex].position);
                 else
                 {
-                    // CHECK IF ENEMY IS BOSS
+                    // Logic khi Enemy ĐI HẾT PATH
                     if (e is Boss)
                     {
-                        // If Boss, immediate Game Over
+                        // If Boss đi qua đích -> THUA
                         SetGameOver(false);
-                        e.gameObject.SetActive(false);
-                        return;
+
+                        // Cập nhật trạng thái trước khi tắt
+                        if (e.gameObject.activeSelf)
+                        {
+                            e.gameObject.SetActive(false);
+                            // Cần gọi DecreaseActiveEnemyCount để cập nhật biến _isBossActive
+                            DecreaseActiveEnemyCount(e);
+                        }
+                        return; // Thoát ngay
                     }
                     else
                     {
-                        // If normal enemy, reduce Lives
+                        // If normal enemy đi qua đích -> Mất Mạng
                         ReduceLives(1);
-                        e.gameObject.SetActive(false);
+
+                        // Cập nhật trạng thái trước khi tắt
+                        if (e.gameObject.activeSelf)
+                        {
+                            e.gameObject.SetActive(false);
+                            // Cần gọi DecreaseActiveEnemyCount để cập nhật biến _activeEnemyCount
+                            DecreaseActiveEnemyCount(e);
+                        }
                     }
                 }
             }
@@ -180,35 +207,52 @@ public class LevelManager : MonoBehaviour
         enemy.SetTargetPosition(_enemyPaths[1].position);
         enemy.SetCurrentPathIndex(1);
         enemy.gameObject.SetActive(true);
+        _activeEnemyCount++; // Tăng đếm khi spawn
     }
 
-    // AUTOMATIC BOSS CHECK
+    // HÀM ĐƯỢC GỌI KHI ENEMY BỊ TIÊU DIỆT HOẶC ĐI QUA ĐÍCH
+    public void EnemyKilledOrPassed()
+    {
+        // Giảm đếm khi Enemy/Boss bị tiêu diệt bởi Tower
+        if (!IsOver)
+        {
+            // Chỉ gọi kiểm tra điều kiện thắng
+            CheckWinCondition();
+        }
+    }
+
+    // ** HÀM MỚI: GIẢM BIẾN ĐẾM KHI KẺ THÙ CHẾT **
+    public void DecreaseActiveEnemyCount(Enemy enemy)
+    {
+        if (enemy is Boss)
+        {
+            _isBossActive = false;
+        }
+        else
+        {
+            // Đảm bảo không giảm dưới 0
+            _activeEnemyCount = Mathf.Max(0, _activeEnemyCount - 1);
+        }
+        // Gọi kiểm tra điều kiện thắng sau khi cập nhật biến đếm
+        EnemyKilledOrPassed();
+    }
+
+
+    // ** HÀM SỬA ĐỔI: SỬ DỤNG BIẾN ĐẾM ĐỂ KIỂM TRA THẮNG **
     public void CheckWinCondition()
     {
-        if (_enemyCounter > 0) return;
+        if (IsOver) return;
 
-        bool hasActiveNormalEnemy = false;
-        bool hasActiveBoss = false;
-
-        foreach (Enemy e in _spawnedEnemies)
-        {
-            if (e.gameObject.activeSelf)
-            {
-                if (e is Boss) hasActiveBoss = true;
-                else hasActiveNormalEnemy = true;
-            }
-        }
-
-        // IF BOSS PREFAB EXISTS AND HASN'T SPAWNED YET -> SPAWN
-        if (_bossPrefab != null && !_hasBossSpawned && !hasActiveNormalEnemy)
+        // 1. LOGIC SPAWN BOSS:
+        if (_bossPrefab != null && !_hasBossSpawned && _enemyCounter <= 0 && _activeEnemyCount <= 0)
         {
             SpawnBoss();
             _hasBossSpawned = true;
             return;
         }
 
-        // IF NO MORE ACTIVE ENEMIES -> WIN
-        if (!hasActiveNormalEnemy && !hasActiveBoss)
+        // 2. LOGIC THẮNG: (Không còn quái nào để spawn, và không còn quái nào đang hoạt động)
+        if (_enemyCounter <= 0 && _activeEnemyCount <= 0 && !_isBossActive)
         {
             SetGameOver(true);
         }
@@ -232,6 +276,7 @@ public class LevelManager : MonoBehaviour
         boss.SetTargetPosition(_enemyPaths[1].position);
         boss.SetCurrentPathIndex(1);
         boss.gameObject.SetActive(true);
+        _isBossActive = true; // Đánh dấu Boss đang hoạt động
 
         if (_statusInfo != null)
         {
@@ -248,18 +293,16 @@ public class LevelManager : MonoBehaviour
     /* ============================================================= */
     private void InstantiateAllTowerUI()
     {
-        
         Tower[] presetTowers = TowerPresetManager.Instance?.GetCurrentTowerPreset();
 
         if (presetTowers == null || presetTowers.Length == 0)
         {
             Debug.LogError("Tower Preset Manager not found or preset is empty! Check Menu Scene configuration.");
-            
             return;
         }
         foreach (Tower t in presetTowers)
         {
-            if (t == null) continue; 
+            if (t == null) continue;
 
             GameObject ui = Instantiate(_towerUIPrefab, _towerUIParent);
             TowerUI tui = ui.GetComponent<TowerUI>();
@@ -281,9 +324,14 @@ public class LevelManager : MonoBehaviour
 
     public void ExplodeAt(Vector2 pos, float radius, int dmg)
     {
-        foreach (Enemy e in _spawnedEnemies)
+        for (int i = _spawnedEnemies.Count - 1; i >= 0; i--)
+        {
+            Enemy e = _spawnedEnemies[i];
             if (e.gameObject.activeSelf && Vector2.Distance(e.transform.position, pos) <= radius)
+            {
                 e.ReduceEnemyHealth(dmg);
+            }
+        }
     }
 
     public void ReduceLives(int v)
@@ -308,30 +356,56 @@ public class LevelManager : MonoBehaviour
 
     public void SetGameOver(bool win)
     {
+        if (IsOver) return; // Bảo vệ: Không gọi 2 lần
+
         IsOver = true;
+        // ** QUAN TRỌNG: Dừng game **
+        Time.timeScale = 0f;
+
         if (_statusInfo != null)
             _statusInfo.text = win ? "You Win!" : "You Lose!";
+
+        // HIỂN THỊ PANEL
         if (_panel != null)
+        {
             _panel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("GAME OVER PANEL (_panel) IS NOT ASSIGNED IN THE INSPECTOR!");
+        }
 
         if (win)
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
             int nextLevel = currentLevel + 1;
+
+            // Logic lưu PlayerPrefs giữ nguyên
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
-                PlayerPrefs.Save();
             }
             int maxCompletedLevel = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
             if (currentLevel > maxCompletedLevel)
             {
                 PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
             }
-            if (_victoryPanelUI != null)
+
+            // ** GỌI VICTORY PANEL (Đã sửa lỗi gọi lặp) **
+            if (_panel != null)
             {
-                _victoryPanelUI.CheckAndShowUnlockNotification();
+                // Tìm kiếm component trong chính Panel và các con (kể cả con đang tắt)
+                VictoryPanelUI victoryUI = _panel.GetComponentInChildren<VictoryPanelUI>(true);
+
+                if (victoryUI != null)
+                {
+                    victoryUI.CheckAndShowUnlockNotification();
+                }
+                else
+                {
+                    Debug.LogWarning("VictoryPanelUI component not found on the _panel GameObject or its children. Skipping tower unlock notification.");
+                }
             }
             PlayerPrefs.Save();
         }

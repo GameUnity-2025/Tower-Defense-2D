@@ -32,9 +32,6 @@ public class Boss : Enemy
         _attackTimer = 0f;
     }
 
-    // >> FIX LỖI DOT VÀ CẢNH BÁO CS0114 <<
-    // Dùng 'protected new' để giải quyết cảnh báo và Hiding (ẩn) hàm của lớp cha.
-    // Dùng 'base.Update()' để gọi logic DOT (Damage Over Time) từ lớp Enemy.
     protected new void Update()
     {
         // **BẮT BUỘC:** Gọi hàm Update của lớp cha để xử lý DOT
@@ -48,7 +45,6 @@ public class Boss : Enemy
             _attackTimer = 0f;
         }
     }
-    // << END FIX >>
 
     public override void MoveToTarget()
     {
@@ -62,9 +58,14 @@ public class Boss : Enemy
 
     public override void ReduceEnemyHealth(int damage)
     {
+        // Gọi logic trừ máu và Die() từ lớp cha
         base.ReduceEnemyHealth(damage);
-        if (_currentHealth > 0 && _currentHealth <= _maxHealth * 0.2f && _healthFill != null)
-            StartCoroutine(FlashHealthBar());
+
+        if (_currentHealth > 0)
+        {
+            if (_currentHealth <= _maxHealth * 0.2f && _healthFill != null)
+                StartCoroutine(FlashHealthBar());
+        }
     }
 
     private void Attack()

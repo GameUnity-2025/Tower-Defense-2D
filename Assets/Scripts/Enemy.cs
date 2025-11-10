@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour
                 ReduceEnemyHealth(burnDmg);
                 _damageAccumulator -= burnDmg;
             }
-      
+
             _burnTimer -= Time.deltaTime;
 
             if (_burnTimer <= 0)
@@ -107,16 +107,13 @@ public class Enemy : MonoBehaviour
 
     public virtual void ReduceEnemyHealth(int damage)
     {
-        if (damage <= 0) return; 
+        if (damage <= 0) return;
 
-        
         _currentHealth -= damage;
 
         AudioPlayer.Instance?.PlaySFX("hit-enemy");
 
-    
         LevelManager.Instance.ShowDamageText(damage, transform.position);
-
 
         if (_currentHealth <= 0)
         {
@@ -130,13 +127,17 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Die()
     {
-        _currentHealth = 0;
+        if (_currentHealth > 0) return;
+
         StopBurnEffect();
 
         gameObject.SetActive(false);
         AudioPlayer.Instance?.PlaySFX("enemy-die");
         LevelManager.Instance?.AddEnergy(20);
-        LevelManager.Instance?.CheckWinCondition();
+
+        // ** Sửa đổi này kích hoạt logic kiểm tra thắng **
+        LevelManager.Instance?.EnemyKilledOrPassed();
+        LevelManager.Instance?.DecreaseActiveEnemyCount(this);
     }
 
     protected virtual void UpdateHealthBar()
@@ -155,7 +156,6 @@ public class Enemy : MonoBehaviour
     }
 
     // --- LOGIC HIỆU ỨNG DOT ---
-
     public void SetBurning(bool burning)
     {
         IsBurning = burning;
@@ -163,10 +163,7 @@ public class Enemy : MonoBehaviour
 
     public void ApplyBurnEffect(float duration, float damagePerSecond)
     {
-     
         _burnTimer = Mathf.Max(_burnTimer, duration);
-
-
         _damagePerSecond = damagePerSecond;
 
         if (!IsBurning)
@@ -177,12 +174,10 @@ public class Enemy : MonoBehaviour
     }
 
     // --- BURN EFFECT VISUALS ---
-
     public void StartBurnEffect()
     {
         if (_burnEffectPrefab != null && _activeBurnEffect == null)
         {
-         
             _activeBurnEffect = Instantiate(_burnEffectPrefab, transform.position, Quaternion.identity, transform);
 
             ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
@@ -202,15 +197,12 @@ public class Enemy : MonoBehaviour
             ParticleSystem ps = _activeBurnEffect.GetComponent<ParticleSystem>();
             if (ps != null)
             {
-               
                 var emission = ps.emission;
                 emission.enabled = false;
 
-          
                 var main = ps.main;
                 main.loop = false;
             }
-
 
             Destroy(_activeBurnEffect, 2f);
             _activeBurnEffect = null;
