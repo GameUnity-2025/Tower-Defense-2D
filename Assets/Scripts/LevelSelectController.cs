@@ -4,12 +4,19 @@ using UnityEngine.UI;
 
 public class LevelSelectController : MonoBehaviour
 {
+    // --- KHAI BÁO CŨ ---
     public Button level1Button;
     public Button level2Button;
     public Button level3Button;
     public Button level4Button;
     public Button level5Button;
     public Button level6Button;
+
+    // --- KHAI BÁO MỚI (Level 7 - 10) ---
+    public Button level7Button;
+    public Button level8Button;
+    public Button level9Button;
+    public Button level10Button;
 
     void Start()
     {
@@ -24,6 +31,11 @@ public class LevelSelectController : MonoBehaviour
         level4Button.onClick.AddListener(() => LoadLevel(4));
         level5Button.onClick.AddListener(() => LoadLevel(5));
         level6Button.onClick.AddListener(() => LoadLevel(6));
+        level7Button.onClick.AddListener(() => LoadLevel(7));
+        level8Button.onClick.AddListener(() => LoadLevel(8));
+        level9Button.onClick.AddListener(() => LoadLevel(9));
+        level10Button.onClick.AddListener(() => LoadLevel(10));
+        // -------------------------
 
         // Set button interactivity based on unlocked level
         level1Button.interactable = true;
@@ -32,6 +44,11 @@ public class LevelSelectController : MonoBehaviour
         level4Button.interactable = unlockedLevel >= 4;
         level5Button.interactable = unlockedLevel >= 5;
         level6Button.interactable = unlockedLevel >= 6;
+        level7Button.interactable = unlockedLevel >= 7;
+        level8Button.interactable = unlockedLevel >= 8;
+        level9Button.interactable = unlockedLevel >= 9;
+        level10Button.interactable = unlockedLevel >= 10;
+        // ----------------------------------------
     }
 
     void LoadLevel(int level)

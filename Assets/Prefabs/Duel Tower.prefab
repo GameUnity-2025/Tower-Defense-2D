@@ -175,7 +175,7 @@ PrefabInstance:
     - target: {fileID: 8124858492870805638, guid: fc3f2c1e6a34b51408c68254a94fb798,
         type: 3}
       propertyPath: m_Name
-      value: Tower Variant 4
+      value: Duel Tower
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5253475726140242948, guid: fc3f2c1e6a34b51408c68254a94fb798, type: 3}

@@ -44,6 +44,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
+    [SerializeField] private VictoryPanelUI _victoryPanelUI;
 
     private int _currentLives;
     private int _enemyCounter;
@@ -328,7 +329,10 @@ public class LevelManager : MonoBehaviour
             {
                 PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
             }
-
+            if (_victoryPanelUI != null)
+            {
+                _victoryPanelUI.CheckAndShowUnlockNotification();
+            }
             PlayerPrefs.Save();
         }
     }

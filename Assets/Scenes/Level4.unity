@@ -5299,8 +5299,8 @@ MonoBehaviour:
     type: 3}
   _damageTextContainer: {fileID: 2141442957}
   _enemyPrefabs:
+  - {fileID: 145525663934751479, guid: 5f3ec187f9d3582459c082af170bdbb8, type: 3}
   - {fileID: 145525663934751479, guid: ca67bdaf57185f6458f1f09139abc7e1, type: 3}
-  - {fileID: 5721372215258040628, guid: dae22a222eb903f49bfa1a89fb63e48e, type: 3}
   _enemyPaths:
   - {fileID: 571645714}
   - {fileID: 1338375352}
@@ -5316,8 +5316,7 @@ MonoBehaviour:
   - {fileID: 1896107178}
   - {fileID: 2091952272}
   _spawnDelay: 5
-  _bossPrefab: {fileID: -97806411721327321, guid: 3fa0c85695ec0164cb4ab43a907516af,
-    type: 3}
+  _bossPrefab: {fileID: 0}
   _maxLives: 5
   _totalEnemy: 15
   _panel: {fileID: 1047872024}
@@ -5325,6 +5324,7 @@ MonoBehaviour:
   _livesInfo: {fileID: 776985991}
   _totalEnemyInfo: {fileID: 1378185555}
   _energyInfo: {fileID: 471248737}
+  _victoryPanelUI: {fileID: 0}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
