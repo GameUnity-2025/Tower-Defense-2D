@@ -49,7 +49,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
 
-    // ** ĐÃ SỬA: BỎ _unlockedTowerPrefab **
+    // ** Panel Thông báo Mở khóa (Unlock Notification) **
     [Header("Tower Unlock Notification")]
     [Tooltip("Panel con chứa thông báo mở khóa (vd: 'NEW TOWER UNLOCKED').")]
     [SerializeField] private GameObject _unlockNotificationPanel;
@@ -72,6 +72,11 @@ public class LevelManager : MonoBehaviour
     /* ============================================================= */
     private void Start()
     {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+
+        // DEBUG: Hiện level hiện tại
+        Debug.Log($"[LevelManager] Khởi tạo Level Manager. Scene Index hiện tại: {currentSceneIndex}");
+
         SetCurrentLives(_maxLives);
         SetTotalEnemy(_totalEnemy);
         _currentEnergy = _initialEnergy;
@@ -143,7 +148,7 @@ public class LevelManager : MonoBehaviour
             t.ShootTarget();
         }
 
-        // ENEMIES (Sử dụng for ngược để tránh InvalidOperationException)
+        // ENEMIES
         for (int i = _spawnedEnemies.Count - 1; i >= 0; i--)
         {
             Enemy e = _spawnedEnemies[i];
@@ -162,8 +167,6 @@ public class LevelManager : MonoBehaviour
                     {
                         // If Boss đi qua đích -> THUA
                         SetGameOver(false);
-
-                        // Cập nhật trạng thái trước khi tắt
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
@@ -175,8 +178,6 @@ public class LevelManager : MonoBehaviour
                     {
                         // If normal enemy đi qua đích -> Mất Mạng
                         ReduceLives(1);
-
-                        // Cập nhật trạng thái trước khi tắt
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
@@ -290,34 +291,24 @@ public class LevelManager : MonoBehaviour
         if (!IsOver) _statusInfo.text = "";
     }
 
-    // ** HÀM SỬA ĐỔI: CHỈ KIỂM TRA CẤP ĐỘ VÀ KÍCH HOẠT UI ĐÃ GÁN **
-    private void CheckAndShowUnlockNotification(int currentLevel)
+    // ** HÀM ĐÃ SỬA LỖI: Nhận giá trị maxCompletedLevelBefore **
+    private void CheckAndShowUnlockNotification(int currentLevel, int maxCompletedLevelBefore)
     {
-        // 1. Kiểm tra UI có được gán không
         if (_unlockNotificationPanel == null)
         {
             return;
         }
 
-        // Level tối đa đã hoàn thành (trước khi cập nhật)
-        int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
-
-        // Điều kiện: currentLevel PHẢI LÀ LẦN ĐẦU TIÊN HOÀN THÀNH
-        // Nếu currentLevel > maxCompletedLevelBefore thì đây là lần đầu tiên
+        // Sử dụng giá trị cũ đã được truyền vào
         bool isFirstCompletion = (currentLevel > maxCompletedLevelBefore);
 
         if (isFirstCompletion)
         {
-            // Bật Panel thông báo mở khóa
             _unlockNotificationPanel.SetActive(true);
-
-            // Kích hoạt Image Tower (Sprite và Text phải được GÁN TRƯỚC trong Inspector)
             if (_towerImageUI != null)
             {
                 _towerImageUI.gameObject.SetActive(true);
             }
-
-            // Kích hoạt Text
             if (_messageTextUI != null)
             {
                 _messageTextUI.gameObject.SetActive(true);
@@ -327,7 +318,6 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            // Nếu đã chơi lại/level thấp hơn max đã hoàn thành: TẮT panel thông báo.
             _unlockNotificationPanel.SetActive(false);
             if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
             if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);
@@ -423,31 +413,36 @@ public class LevelManager : MonoBehaviour
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
 
+            Debug.Log($"[LevelManager] ĐÃ THẮNG Level {currentLevel}. Bắt đầu quá trình lưu và kiểm tra mở khóa.");
+
             // Lấy max level đã hoàn thành TRƯỚC khi cập nhật
             int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
 
-            // Cập nhật cấp độ đã mở khóa (cho menu)
+            Debug.Log($"[LevelManager] Giá trị MaxCompletedLevel trước khi cập nhật: {maxCompletedLevelBefore}");
+
+            // Cập nhật cấp độ đã mở khóa (cho menu Level Select)
             int nextLevel = currentLevel + 1;
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
+                Debug.Log($"[LevelManager] Cập nhật LastLevel thành {nextLevel}.");
             }
 
             // Cập nhật cấp độ hoàn thành tối đa (quan trọng cho logic mở khóa)
             if (currentLevel > maxCompletedLevelBefore)
             {
                 PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
+                Debug.Log($"[LevelManager] Cập nhật MaxCompletedLevel thành {currentLevel}.");
             }
 
-            // GỌI HÀM KIỂM TRA VÀ HIỂN THỊ
-            CheckAndShowUnlockNotification(currentLevel);
+            // ** LỜI GỌI ĐÃ SỬA: Truyền maxCompletedLevelBefore vào hàm **
+            CheckAndShowUnlockNotification(currentLevel, maxCompletedLevelBefore);
 
             PlayerPrefs.Save();
         }
-        else
+        else // Trường hợp THUA (win = false)
         {
-            // Đảm bảo thông báo mở khóa bị tắt khi THUA
             if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
             if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
             if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);

@@ -1,14 +1,13 @@
-﻿// TowerInfoPanel.cs
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
 using UnityEngine.EventSystems;
-using System.Collections; // Vẫn giữ để đề phòng có các logic Coroutine khác
+using System.Collections;
 
 public class TowerInfoPanel : MonoBehaviour
 {
+    // Đảm bảo Instance là public static và chỉ có thể set từ bên trong.
     public static TowerInfoPanel Instance { get; private set; }
 
     [SerializeField] private TMP_Text _towerName;
@@ -22,13 +21,16 @@ public class TowerInfoPanel : MonoBehaviour
 
     private void Awake()
     {
+        // Logic Singleton tiêu chuẩn
         if (Instance == null)
         {
             Instance = this;
+            // Đảm bảo Panel bị tắt khi bắt đầu (nếu nó được active trong Editor)
             if (gameObject.activeSelf) gameObject.SetActive(false);
         }
         else
         {
+            // Nếu đã có Instance khác, hủy đối tượng hiện tại
             Destroy(gameObject);
         }
     }
@@ -38,7 +40,9 @@ public class TowerInfoPanel : MonoBehaviour
         _currentTower = tower;
         UpdateInfo(tower);
 
-        // Position logic (nếu có)
+        // TODO: Thêm logic định vị Panel UI dựa trên worldPosition
+        // Ví dụ: Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
+        // transform.position = screenPos;
 
         gameObject.SetActive(true);
     }

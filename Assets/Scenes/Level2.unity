@@ -5693,6 +5693,9 @@ MonoBehaviour:
   _livesInfo: {fileID: 776985991}
   _totalEnemyInfo: {fileID: 1378185555}
   _energyInfo: {fileID: 471248737}
+  _unlockNotificationPanel: {fileID: 0}
+  _towerImageUI: {fileID: 0}
+  _messageTextUI: {fileID: 0}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
