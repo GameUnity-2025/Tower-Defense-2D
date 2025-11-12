@@ -36,7 +36,6 @@ public class LevelManager : MonoBehaviour
     private List<Bullet> _spawnedBullets = new List<Bullet>();
     public List<Enemy> GetEnemies() => _spawnedEnemies;
 
-    // ** KHAI BÁO BIẾN ĐẾM MỚI **
     private int _activeEnemyCount = 0;
     private bool _isBossActive = false;
 
@@ -49,6 +48,13 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Text _livesInfo;
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
+
+    // ** ĐÃ SỬA: BỎ _unlockedTowerPrefab **
+    [Header("Tower Unlock Notification")]
+    [Tooltip("Panel con chứa thông báo mở khóa (vd: 'NEW TOWER UNLOCKED').")]
+    [SerializeField] private GameObject _unlockNotificationPanel;
+    [SerializeField] private Image _towerImageUI;
+    [SerializeField] private TMP_Text _messageTextUI;
 
     private int _currentLives;
     private int _enemyCounter;
@@ -75,13 +81,16 @@ public class LevelManager : MonoBehaviour
         _hasBossSpawned = false;
         IsOver = false;
 
-        // ** KHỞI TẠO BIẾN ĐẾM **
         _activeEnemyCount = 0;
         _isBossActive = false;
 
         if (_panel != null) _panel.SetActive(false);
+
+        // Đảm bảo Panel thông báo bị tắt ngay từ đầu
+        if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
+        if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
+
         InitializeExistingTowers();
-        // ** Đảm bảo Time.timeScale được đặt về 1 khi bắt đầu màn chơi **
         Time.timeScale = 1f;
     }
 
@@ -158,10 +167,9 @@ public class LevelManager : MonoBehaviour
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
-                            // Cần gọi DecreaseActiveEnemyCount để cập nhật biến _isBossActive
                             DecreaseActiveEnemyCount(e);
                         }
-                        return; // Thoát ngay
+                        return;
                     }
                     else
                     {
@@ -172,7 +180,6 @@ public class LevelManager : MonoBehaviour
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
-                            // Cần gọi DecreaseActiveEnemyCount để cập nhật biến _activeEnemyCount
                             DecreaseActiveEnemyCount(e);
                         }
                     }
@@ -207,21 +214,17 @@ public class LevelManager : MonoBehaviour
         enemy.SetTargetPosition(_enemyPaths[1].position);
         enemy.SetCurrentPathIndex(1);
         enemy.gameObject.SetActive(true);
-        _activeEnemyCount++; // Tăng đếm khi spawn
+        _activeEnemyCount++;
     }
 
-    // HÀM ĐƯỢC GỌI KHI ENEMY BỊ TIÊU DIỆT HOẶC ĐI QUA ĐÍCH
     public void EnemyKilledOrPassed()
     {
-        // Giảm đếm khi Enemy/Boss bị tiêu diệt bởi Tower
         if (!IsOver)
         {
-            // Chỉ gọi kiểm tra điều kiện thắng
             CheckWinCondition();
         }
     }
 
-    // ** HÀM MỚI: GIẢM BIẾN ĐẾM KHI KẺ THÙ CHẾT **
     public void DecreaseActiveEnemyCount(Enemy enemy)
     {
         if (enemy is Boss)
@@ -230,15 +233,12 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            // Đảm bảo không giảm dưới 0
             _activeEnemyCount = Mathf.Max(0, _activeEnemyCount - 1);
         }
-        // Gọi kiểm tra điều kiện thắng sau khi cập nhật biến đếm
         EnemyKilledOrPassed();
     }
 
 
-    // ** HÀM SỬA ĐỔI: SỬ DỤNG BIẾN ĐẾM ĐỂ KIỂM TRA THẮNG **
     public void CheckWinCondition()
     {
         if (IsOver) return;
@@ -251,7 +251,7 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // 2. LOGIC THẮNG: (Không còn quái nào để spawn, và không còn quái nào đang hoạt động)
+        // 2. LOGIC THẮNG: 
         if (_enemyCounter <= 0 && _activeEnemyCount <= 0 && !_isBossActive)
         {
             SetGameOver(true);
@@ -276,7 +276,7 @@ public class LevelManager : MonoBehaviour
         boss.SetTargetPosition(_enemyPaths[1].position);
         boss.SetCurrentPathIndex(1);
         boss.gameObject.SetActive(true);
-        _isBossActive = true; // Đánh dấu Boss đang hoạt động
+        _isBossActive = true;
 
         if (_statusInfo != null)
         {
@@ -288,6 +288,52 @@ public class LevelManager : MonoBehaviour
     private void ClearBossMessage()
     {
         if (!IsOver) _statusInfo.text = "";
+    }
+
+    // ** HÀM SỬA ĐỔI: CHỈ KIỂM TRA CẤP ĐỘ VÀ KÍCH HOẠT UI ĐÃ GÁN **
+    private void CheckAndShowUnlockNotification(int currentLevel)
+    {
+        // 1. Kiểm tra UI có được gán không
+        if (_unlockNotificationPanel == null)
+        {
+            return;
+        }
+
+        // Level tối đa đã hoàn thành (trước khi cập nhật)
+        int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
+
+        // Điều kiện: currentLevel PHẢI LÀ LẦN ĐẦU TIÊN HOÀN THÀNH
+        // Nếu currentLevel > maxCompletedLevelBefore thì đây là lần đầu tiên
+        bool isFirstCompletion = (currentLevel > maxCompletedLevelBefore);
+
+        if (isFirstCompletion)
+        {
+            // Bật Panel thông báo mở khóa
+            _unlockNotificationPanel.SetActive(true);
+
+            // Kích hoạt Image Tower (Sprite và Text phải được GÁN TRƯỚC trong Inspector)
+            if (_towerImageUI != null)
+            {
+                _towerImageUI.gameObject.SetActive(true);
+            }
+
+            // Kích hoạt Text
+            if (_messageTextUI != null)
+            {
+                _messageTextUI.gameObject.SetActive(true);
+            }
+
+            Debug.Log($"[NOTIFICATION] Level {currentLevel} completed for the first time. Showing unlock notification.");
+        }
+        else
+        {
+            // Nếu đã chơi lại/level thấp hơn max đã hoàn thành: TẮT panel thông báo.
+            _unlockNotificationPanel.SetActive(false);
+            if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
+            if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);
+
+            Debug.Log($"[NOTIFICATION] Level {currentLevel} already completed. Skipping unlock notification.");
+        }
     }
 
     /* ============================================================= */
@@ -356,16 +402,14 @@ public class LevelManager : MonoBehaviour
 
     public void SetGameOver(bool win)
     {
-        if (IsOver) return; // Bảo vệ: Không gọi 2 lần
+        if (IsOver) return;
 
         IsOver = true;
-        // ** QUAN TRỌNG: Dừng game **
         Time.timeScale = 0f;
 
         if (_statusInfo != null)
             _statusInfo.text = win ? "You Win!" : "You Lose!";
 
-        // HIỂN THỊ PANEL
         if (_panel != null)
         {
             _panel.SetActive(true);
@@ -378,36 +422,35 @@ public class LevelManager : MonoBehaviour
         if (win)
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
-            int nextLevel = currentLevel + 1;
 
-            // Logic lưu PlayerPrefs giữ nguyên
+            // Lấy max level đã hoàn thành TRƯỚC khi cập nhật
+            int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
+
+            // Cập nhật cấp độ đã mở khóa (cho menu)
+            int nextLevel = currentLevel + 1;
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
             }
-            int maxCompletedLevel = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
-            if (currentLevel > maxCompletedLevel)
+
+            // Cập nhật cấp độ hoàn thành tối đa (quan trọng cho logic mở khóa)
+            if (currentLevel > maxCompletedLevelBefore)
             {
                 PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
             }
 
-            // ** GỌI VICTORY PANEL (Đã sửa lỗi gọi lặp) **
-            if (_panel != null)
-            {
-                // Tìm kiếm component trong chính Panel và các con (kể cả con đang tắt)
-                VictoryPanelUI victoryUI = _panel.GetComponentInChildren<VictoryPanelUI>(true);
+            // GỌI HÀM KIỂM TRA VÀ HIỂN THỊ
+            CheckAndShowUnlockNotification(currentLevel);
 
-                if (victoryUI != null)
-                {
-                    victoryUI.CheckAndShowUnlockNotification();
-                }
-                else
-                {
-                    Debug.LogWarning("VictoryPanelUI component not found on the _panel GameObject or its children. Skipping tower unlock notification.");
-                }
-            }
             PlayerPrefs.Save();
+        }
+        else
+        {
+            // Đảm bảo thông báo mở khóa bị tắt khi THUA
+            if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
+            if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
+            if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);
         }
     }
 
