@@ -9,6 +9,7 @@ using TMPro;
 public class LevelManager : MonoBehaviour
 {
     private static LevelManager _instance = null;
+
     public static LevelManager Instance
     {
         get
@@ -34,6 +35,7 @@ public class LevelManager : MonoBehaviour
     private List<Enemy> _spawnedEnemies = new List<Enemy>();
     private float _runningSpawnDelay;
     private List<Bullet> _spawnedBullets = new List<Bullet>();
+
     public List<Enemy> GetEnemies() => _spawnedEnemies;
 
     private int _activeEnemyCount = 0;
@@ -53,6 +55,7 @@ public class LevelManager : MonoBehaviour
     [Header("Tower Unlock Notification")]
     [Tooltip("Panel con chứa thông báo mở khóa (vd: 'NEW TOWER UNLOCKED').")]
     [SerializeField] private GameObject _unlockNotificationPanel;
+
     [SerializeField] private Image _towerImageUI;
     [SerializeField] private TMP_Text _messageTextUI;
 
@@ -68,8 +71,8 @@ public class LevelManager : MonoBehaviour
 
     public int GetCurrentEnergy() => _currentEnergy;
 
-
     /* ============================================================= */
+
     private void Start()
     {
         SetCurrentLives(_maxLives);
@@ -114,7 +117,6 @@ public class LevelManager : MonoBehaviour
             }
         }
     }
-
 
     private void Update()
     {
@@ -201,6 +203,7 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
+
     private void SpawnNormalEnemy()
     {
         SetTotalEnemy(--_enemyCounter);
@@ -238,7 +241,6 @@ public class LevelManager : MonoBehaviour
         EnemyKilledOrPassed();
     }
 
-
     public void CheckWinCondition()
     {
         if (IsOver) return;
@@ -251,7 +253,7 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // 2. LOGIC THẮNG: 
+        // 2. LOGIC THẮNG:
         if (_enemyCounter <= 0 && _activeEnemyCount <= 0 && !_isBossActive)
         {
             SetGameOver(true);
@@ -337,6 +339,7 @@ public class LevelManager : MonoBehaviour
     }
 
     /* ============================================================= */
+
     private void InstantiateAllTowerUI()
     {
         Tower[] presetTowers = TowerPresetManager.Instance?.GetCurrentTowerPreset();
@@ -356,7 +359,9 @@ public class LevelManager : MonoBehaviour
             ui.name = t.name;
         }
     }
+
     public void RegisterSpawnedTower(Tower t) => _spawnedTowers.Add(t);
+
     public void RegisterSpawnedTowerRemoval(Tower tower) => _spawnedTowers.Remove(tower);
 
     public Bullet GetBulletFromPool(Bullet prefab)

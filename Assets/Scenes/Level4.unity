@@ -5301,6 +5301,7 @@ MonoBehaviour:
   _enemyPrefabs:
   - {fileID: 145525663934751479, guid: 5f3ec187f9d3582459c082af170bdbb8, type: 3}
   - {fileID: 145525663934751479, guid: ca67bdaf57185f6458f1f09139abc7e1, type: 3}
+  - {fileID: 5993420688869458812, guid: 6a6acec13cd39044dafef06a94353857, type: 3}
   _enemyPaths:
   - {fileID: 571645714}
   - {fileID: 1338375352}
@@ -5324,7 +5325,9 @@ MonoBehaviour:
   _livesInfo: {fileID: 776985991}
   _totalEnemyInfo: {fileID: 1378185555}
   _energyInfo: {fileID: 471248737}
-  _victoryPanelUI: {fileID: 0}
+  _unlockNotificationPanel: {fileID: 0}
+  _towerImageUI: {fileID: 0}
+  _messageTextUI: {fileID: 0}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
