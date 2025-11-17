@@ -1,11 +1,9 @@
-﻿// TowerInfoPanel.cs
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
 using UnityEngine.EventSystems;
-using System.Collections; // Vẫn giữ để đề phòng có các logic Coroutine khác
+using System.Collections;
 
 public class TowerInfoPanel : MonoBehaviour
 {
@@ -25,6 +23,8 @@ public class TowerInfoPanel : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            // Đảm bảo Panel bị tắt khi bắt đầu (nếu nó được active trong Editor)
+            // LƯU Ý: Nếu vấn đề vẫn tiếp diễn, hãy chuyển hẳn gameObject.SetActive(false) lên đây.
             if (gameObject.activeSelf) gameObject.SetActive(false);
         }
         else
@@ -35,10 +35,13 @@ public class TowerInfoPanel : MonoBehaviour
 
     public void ShowPanel(Tower tower, Vector3 worldPosition)
     {
+        // 🚨 QUAN TRỌNG: Kiểm tra nếu Panel khác đang mở và đóng nó. (Ví dụ: Panel chọn tháp)
+        // Nếu không có xung đột, tiếp tục.
+
         _currentTower = tower;
         UpdateInfo(tower);
 
-        // Position logic (nếu có)
+        // TODO: Thêm logic định vị Panel UI dựa trên worldPosition
 
         gameObject.SetActive(true);
     }
@@ -48,11 +51,16 @@ public class TowerInfoPanel : MonoBehaviour
         string displayName = tower.name.Replace("(Clone)", "").Trim();
         _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
 
-        // Logic cập nhật thông tin (FireTower vs Normal Tower)
-        if (tower.GetType().Name.Contains("FireTower"))
+        // === LOGIC CẬP NHẬT THÔNG TIN VÀ FIX LỖI FIRE TOWER ===
+
+        // Sử dụng 'as' để kiểm tra và ép kiểu an toàn
+        FireTower fireTower = tower as FireTower;
+
+        if (fireTower != null)
         {
-            FireTower fireTower = tower as FireTower;
-            if (fireTower != null)
+            // FIX: Đảm bảo các hàm chỉ được gọi khi đối tượng FireTower hợp lệ
+            // (Nếu FireTower.cs có lỗi khởi tạo, bạn cần fix trong script đó)
+            try
             {
                 float dps = fireTower.GetCurrentBurnDPS();
                 float duration = fireTower.GetCurrentBurnDuration();
@@ -61,8 +69,16 @@ public class TowerInfoPanel : MonoBehaviour
                 _rangeText.text = $"Burn Duration: {duration:F1}s";
                 _fireRateText.text = $"Rate: {1f / fireTower.GetShootDelay():F2}/s";
             }
+            catch (System.Exception ex)
+            {
+                // Nếu có lỗi, log ra và hiển thị thông tin chung để Panel không bị sập.
+                Debug.LogError($"Lỗi khi truy cập FireTower data lần đầu: {ex.Message}", tower);
+                _damageText.text = $"Damage: N/A";
+                _rangeText.text = $"Range: N/A";
+                _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s (Fallback)";
+            }
         }
-        else
+        else // Tháp thường
         {
             _damageText.text = $"Damage: {tower.GetShootPower()}";
             _rangeText.text = $"Range: {tower.GetShootDistance():F1}";
@@ -70,6 +86,7 @@ public class TowerInfoPanel : MonoBehaviour
         }
 
         // === UPGRADE BUTTON ===
+        // Logic này không đổi, nhưng được giữ lại để hoàn chỉnh
         if (tower.CurrentLevel < 3)
         {
             int cost = tower.GetUpgradeCost();

@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour
 
     /* ---------- GAME STATE ---------- */
     public bool IsOver { get; private set; }
-    [SerializeField] private int _maxLives = 3;
+    [SerializeField] private int _maxLives = 3; // Mặc định là 3 máu
     [SerializeField] private int _totalEnemy = 15;
     [SerializeField] private GameObject _panel; // Panel Game Over/Victory
     [SerializeField] private Text _statusInfo;
@@ -51,13 +51,24 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Text _totalEnemyInfo;
     [SerializeField] private TMPro.TextMeshProUGUI _energyInfo;
 
-    // ** ĐÃ SỬA: BỎ _unlockedTowerPrefab **
+    // ** Panel Thông báo Mở khóa (Unlock Notification) **
     [Header("Tower Unlock Notification")]
     [Tooltip("Panel con chứa thông báo mở khóa (vd: 'NEW TOWER UNLOCKED').")]
     [SerializeField] private GameObject _unlockNotificationPanel;
 
     [SerializeField] private Image _towerImageUI;
     [SerializeField] private TMP_Text _messageTextUI;
+
+    // ** Cơ chế Đánh giá Sao **
+    [Header("Star Rating Logic")]
+    private int _currentStarRating = 0; // Số sao đạt được trong lượt chơi hiện tại
+
+    // ********** THÊM THAM CHIẾU UI SAO CHO PANEL VICTORY **********
+    [Header("Victory Star UI")]
+    [Tooltip("Kéo 3 Game Object đại diện cho 3 sao (sao 1, sao 2, sao 3) vào đây.")]
+    [SerializeField] private GameObject[] _victoryStarObjects = new GameObject[3];
+
+    // *************************************************************
 
     private int _currentLives;
     private int _enemyCounter;
@@ -75,6 +86,10 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+
+        Debug.Log($"[LevelManager] Khởi tạo Level Manager. Scene Index hiện tại: {currentSceneIndex}");
+
         SetCurrentLives(_maxLives);
         SetTotalEnemy(_totalEnemy);
         _currentEnergy = _initialEnergy;
@@ -88,10 +103,14 @@ public class LevelManager : MonoBehaviour
         _isBossActive = false;
 
         if (_panel != null) _panel.SetActive(false);
-
-        // Đảm bảo Panel thông báo bị tắt ngay từ đầu
         if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
         if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
+
+        // Đảm bảo sao trên panel victory bị tắt khi Start
+        foreach (GameObject star in _victoryStarObjects)
+        {
+            if (star != null) star.SetActive(false);
+        }
 
         InitializeExistingTowers();
         Time.timeScale = 1f;
@@ -145,7 +164,7 @@ public class LevelManager : MonoBehaviour
             t.ShootTarget();
         }
 
-        // ENEMIES (Sử dụng for ngược để tránh InvalidOperationException)
+        // ENEMIES
         for (int i = _spawnedEnemies.Count - 1; i >= 0; i--)
         {
             Enemy e = _spawnedEnemies[i];
@@ -162,10 +181,7 @@ public class LevelManager : MonoBehaviour
                     // Logic khi Enemy ĐI HẾT PATH
                     if (e is Boss)
                     {
-                        // If Boss đi qua đích -> THUA
                         SetGameOver(false);
-
-                        // Cập nhật trạng thái trước khi tắt
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
@@ -175,10 +191,7 @@ public class LevelManager : MonoBehaviour
                     }
                     else
                     {
-                        // If normal enemy đi qua đích -> Mất Mạng
                         ReduceLives(1);
-
-                        // Cập nhật trạng thái trước khi tắt
                         if (e.gameObject.activeSelf)
                         {
                             e.gameObject.SetActive(false);
@@ -292,34 +305,22 @@ public class LevelManager : MonoBehaviour
         if (!IsOver) _statusInfo.text = "";
     }
 
-    // ** HÀM SỬA ĐỔI: CHỈ KIỂM TRA CẤP ĐỘ VÀ KÍCH HOẠT UI ĐÃ GÁN **
-    private void CheckAndShowUnlockNotification(int currentLevel)
+    private void CheckAndShowUnlockNotification(int currentLevel, int maxCompletedLevelBefore)
     {
-        // 1. Kiểm tra UI có được gán không
         if (_unlockNotificationPanel == null)
         {
             return;
         }
 
-        // Level tối đa đã hoàn thành (trước khi cập nhật)
-        int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
-
-        // Điều kiện: currentLevel PHẢI LÀ LẦN ĐẦU TIÊN HOÀN THÀNH
-        // Nếu currentLevel > maxCompletedLevelBefore thì đây là lần đầu tiên
         bool isFirstCompletion = (currentLevel > maxCompletedLevelBefore);
 
         if (isFirstCompletion)
         {
-            // Bật Panel thông báo mở khóa
             _unlockNotificationPanel.SetActive(true);
-
-            // Kích hoạt Image Tower (Sprite và Text phải được GÁN TRƯỚC trong Inspector)
             if (_towerImageUI != null)
             {
                 _towerImageUI.gameObject.SetActive(true);
             }
-
-            // Kích hoạt Text
             if (_messageTextUI != null)
             {
                 _messageTextUI.gameObject.SetActive(true);
@@ -329,7 +330,6 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            // Nếu đã chơi lại/level thấp hơn max đã hoàn thành: TẮT panel thông báo.
             _unlockNotificationPanel.SetActive(false);
             if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
             if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);
@@ -428,34 +428,86 @@ public class LevelManager : MonoBehaviour
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
 
-            // Lấy max level đã hoàn thành TRƯỚC khi cập nhật
+            // **********************************************
+            // ********* LOGIC TÍNH TOÁN VÀ LƯU SỐ SAO *********
+            // **********************************************
+            _currentStarRating = 0;
+
+            // Logic tính toán sao dựa trên 3 máu (maxLives)
+            if (_currentLives == _maxLives) // Máu còn 3/3
+            {
+                _currentStarRating = 3;
+            }
+            else if (_currentLives >= 2) // Máu còn 2
+            {
+                _currentStarRating = 2;
+            }
+            else if (_currentLives >= 1) // Máu còn 1
+            {
+                _currentStarRating = 1;
+            }
+
+            // 1. Lấy số sao cao nhất đã lưu
+            string starKey = "LevelStars_" + currentLevel;
+            int previousStars = PlayerPrefs.GetInt(starKey, 0);
+
+            // 2. LƯU: Chỉ lưu số sao MỚI nếu nó CAO HƠN số sao đã lưu
+            if (_currentStarRating > previousStars)
+            {
+                PlayerPrefs.SetInt(starKey, _currentStarRating);
+                Debug.Log($"[Star Rating] Đã cập nhật số sao (High Score) từ {previousStars} lên {_currentStarRating}.");
+            }
+            else
+            {
+                Debug.Log($"[Star Rating] Số sao hiện tại ({_currentStarRating}) không cao hơn số sao đã lưu ({previousStars}). Giữ nguyên.");
+            }
+
+            // ********** HIỂN THỊ SAO TRÊN PANEL VICTORY **********
+            // i=0 là sao 1, i=1 là sao 2, i=2 là sao 3
+            for (int i = 0; i < _victoryStarObjects.Length; i++)
+            {
+                if (_victoryStarObjects[i] != null)
+                {
+                    // Chỉ bật đối tượng sao nếu chỉ số của nó nhỏ hơn số sao đạt được (i < _currentStarRating)
+                    _victoryStarObjects[i].SetActive(i < _currentStarRating);
+                }
+            }
+            // ******************************************************
+            // **********************************************
+
+            // Lưu trạng thái level đã hoàn thành (LastLevel và MaxCompletedLevel)
             int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);
 
-            // Cập nhật cấp độ đã mở khóa (cho menu)
             int nextLevel = currentLevel + 1;
             int unlockedLevel = PlayerPrefs.GetInt("LastLevel", 1);
             if (nextLevel > unlockedLevel)
             {
                 PlayerPrefs.SetInt("LastLevel", nextLevel);
+                Debug.Log($"[LevelManager] Cập nhật LastLevel thành {nextLevel}.");
             }
 
-            // Cập nhật cấp độ hoàn thành tối đa (quan trọng cho logic mở khóa)
             if (currentLevel > maxCompletedLevelBefore)
             {
                 PlayerPrefs.SetInt("MaxCompletedLevel", currentLevel);
+                Debug.Log($"[LevelManager] Cập nhật MaxCompletedLevel thành {currentLevel}.");
             }
 
-            // GỌI HÀM KIỂM TRA VÀ HIỂN THỊ
-            CheckAndShowUnlockNotification(currentLevel);
+            CheckAndShowUnlockNotification(currentLevel, maxCompletedLevelBefore);
 
             PlayerPrefs.Save();
         }
-        else
+        else // Trường hợp THUA (win = false)
         {
-            // Đảm bảo thông báo mở khóa bị tắt khi THUA
+            _currentStarRating = 0; // Thua là 0 sao
             if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
             if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
             if (_messageTextUI != null) _messageTextUI.gameObject.SetActive(false);
+
+            // Đảm bảo sao trên panel victory bị tắt khi Thua
+            foreach (GameObject star in _victoryStarObjects)
+            {
+                if (star != null) star.SetActive(false);
+            }
         }
     }
 

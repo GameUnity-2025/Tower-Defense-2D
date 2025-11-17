@@ -140,7 +140,6 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
     // ** THAY THẾ BẰNG IPointerClickHandler **
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Debug 1: Xác nhận tháp nhận được click
         Debug.Log($"[TOWER TAP] Tower: {gameObject.name} clicked/tapped. _isPlaced: {_isPlaced}");
 
         if (!_isPlaced)
@@ -149,14 +148,18 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
             return;
         }
 
-        // Debug 2: Kiểm tra tham chiếu Singleton
-        if (TowerInfoPanel.Instance == null)
+        if (TowerInfoPanel.Instance != null)
         {
-            Debug.LogError("TowerInfoPanel.Instance IS NULL in OnPointerClick! Panel cannot show.");
-            return;
+            if (TowerInfoPanel.Instance.gameObject.activeSelf)
+            {
+                TowerInfoPanel.Instance.HidePanel();
+            }
+            TowerInfoPanel.Instance.ShowPanel(this, this.transform.position);
         }
-
-        // Debug 3: Xác nhận panel được gọi
+        else
+        {
+            Debug.LogError("TowerInfoPanel.Instance IS NULL! Vấn đề nằm ở thiết lập Scene/UI.");
+        }
         Debug.Log($"[TOWER TAP] Success! Calling ShowPanel for: {gameObject.name}");
         TowerInfoPanel.Instance?.ShowPanel(this, transform.position);
     }
