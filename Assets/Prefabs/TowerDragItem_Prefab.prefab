@@ -89,3 +89,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TowerPrefab: {fileID: 0}
+  _lockOverlay: {fileID: 0}
+  _requiredLevelText: {fileID: 0}

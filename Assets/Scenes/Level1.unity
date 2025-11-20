@@ -1283,6 +1283,7 @@ MonoBehaviour:
   - {fileID: 1654089137}
   - {fileID: 2075721053}
   - {fileID: 2029806398}
+  _nextLevelButton: {fileID: 1574546296}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
@@ -7512,7 +7513,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: 219925235
   m_SortingOrder: 3
   m_TargetDisplay: 0
 --- !u!224 &1933846123
@@ -7527,12 +7528,12 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2043157616}
   - {fileID: 1204256940}
   - {fileID: 876660016}
   - {fileID: 1591352195}
   - {fileID: 589526566}
   - {fileID: 950334667}
-  - {fileID: 2043157616}
   - {fileID: 1978043676}
   - {fileID: 545875656}
   m_Father: {fileID: 0}
