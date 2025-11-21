@@ -5841,6 +5841,7 @@ MonoBehaviour:
   - {fileID: 2117327081848257266, guid: b1db1313b3f97e143ba20e2873f8d471, type: 3}
   - {fileID: 2405443755552656510, guid: 1866cb5b18cfb1442b96754c02f8e807, type: 3}
   - {fileID: 6413046108515076153, guid: 32707c41eac7c974a91e9a124ad26b8b, type: 3}
+  - {fileID: -5440319201587289800, guid: 4f06b09866865d24fbed8f15dd36e602, type: 3}
   _maxPresetSlots: 3
 --- !u!4 &1458661303
 Transform:

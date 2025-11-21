@@ -11,11 +11,12 @@ public class IceWaveTower : Tower
     [Tooltip("Thời gian giữa các lần tạo xung kích (tính bằng giây).")]
     [SerializeField] private float _waveDelay = 2.0f;
 
-    [Tooltip("Kích thước tối đa của sóng băng (ảnh hưởng đến Scale và phạm vi va chạm).")]
-    [SerializeField] private float _waveSize = 3.0f; // BIẾN MỚI
+    // Biến này quyết định kích thước cuối cùng của sóng băng
+    [Tooltip("Kích thước tối đa của sóng băng (final scale).")]
+    [SerializeField] private float _waveSize = 3.0f;
 
     private float _timeSinceLastWave;
-    private Enemy _targetEnemy;
+    // Đã xóa 'private Enemy _targetEnemy;' để tránh lỗi serialization (Giả định nằm ở lớp Tower)
 
     protected override void Start()
     {
@@ -27,9 +28,8 @@ public class IceWaveTower : Tower
     {
         _timeSinceLastWave += Time.deltaTime;
 
-        _targetEnemy = FindTarget();
-
-        if (_targetEnemy != null && _timeSinceLastWave >= _waveDelay)
+        // Chỉ kích hoạt GenerateIceWave() khi có kẻ địch trong tầm bắn
+        if (FindTarget() != null && _timeSinceLastWave >= _waveDelay)
         {
             GenerateIceWave();
             _timeSinceLastWave = 0f;
@@ -38,7 +38,7 @@ public class IceWaveTower : Tower
 
     private Enemy FindTarget()
     {
-        // SỬ DỤNG VẬT LÝ 2D: Physics2D.OverlapCircleAll
+        // SỬ DỤNG GetShootDistance() (Tầm bắn của Tháp) để kiểm tra kích hoạt
         float range = GetShootDistance();
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, range);
 
@@ -49,8 +49,7 @@ public class IceWaveTower : Tower
                 Enemy enemy = hitCollider.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    // Trả về kẻ địch đầu tiên tìm thấy trong tầm bắn của tháp
-                    return enemy;
+                    return enemy; // Trả về kẻ địch đầu tiên tìm thấy trong tầm bắn
                 }
             }
         }
@@ -65,13 +64,16 @@ public class IceWaveTower : Tower
             return;
         }
 
+        // Kích thước cuối cùng của sóng được lấy từ biến _waveSize
+        float waveFinalSize = _waveSize;
+
         GameObject waveObject = Instantiate(_iceWaveProjectilePrefab, transform.position, Quaternion.identity);
         IceWaveProjectile projectile = waveObject.GetComponent<IceWaveProjectile>();
 
         if (projectile != null)
         {
-            // GỌI HÀM KHỞI TẠO MỚI VỚI KÍCH THƯỚC
-            projectile.Initialize(_waveSize);
+            // Truyền kích thước cuối cùng vào Projectile
+            projectile.Initialize(waveFinalSize);
         }
         else
         {
@@ -83,6 +85,11 @@ public class IceWaveTower : Tower
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        // Gizmos.DrawWireSphere(transform.position, GetShootDistance()); 
+        // Hiển thị Phạm vi Kích hoạt (Tầm bắn của Tháp)
+        Gizmos.DrawWireSphere(transform.position, GetShootDistance());
+
+        Gizmos.color = Color.blue;
+        // Hiển thị Kích thước Tối đa của Sóng (Kích thước Projectile)
+        Gizmos.DrawWireSphere(transform.position, _waveSize);
     }
 }

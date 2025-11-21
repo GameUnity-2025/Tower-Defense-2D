@@ -16,12 +16,12 @@ PrefabInstance:
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
       propertyPath: m_Size.x
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
       propertyPath: m_Size.y
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
@@ -55,13 +55,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
+      propertyPath: m_SpriteTilingProperty.drawMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
+        type: 3}
       propertyPath: m_SpriteTilingProperty.newSize.x
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
       propertyPath: m_SpriteTilingProperty.newSize.y
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
@@ -81,12 +86,12 @@ PrefabInstance:
     - target: {fileID: 4863645274412345707, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4863645274412345707, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4863645274412345707, guid: c7c9ee449ac536549a769d81134d7288,
         type: 3}
@@ -162,6 +167,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: -7567709054063609934}
   m_SourcePrefab: {fileID: 100100000, guid: c7c9ee449ac536549a769d81134d7288, type: 3}
+--- !u!61 &1821823016328212867 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 4354458261694845920, guid: c7c9ee449ac536549a769d81134d7288,
+    type: 3}
+  m_PrefabInstance: {fileID: 2676913710995972707}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2601424238607109540 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 89037737344970695, guid: c7c9ee449ac536549a769d81134d7288,
@@ -213,8 +224,8 @@ SpriteRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 5, y: 5}
+  m_DrawMode: 1
+  m_Size: {x: 7, y: 7}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -254,5 +265,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _damage: 1
-  _slowAmount: 0.7
+  _slowAmount: 0.3
   _slowDuration: 5
+  _lifetime: 0.5
+  _defaultSpriteSize: 7
+  _finalColliderSize: 2
+  _growthSpeedMultiplier: 1
+  _waveCollider: {fileID: 1821823016328212867}
+  _waveRenderer: {fileID: -6285675387055535972}
