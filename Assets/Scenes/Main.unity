@@ -6066,39 +6066,39 @@ MonoBehaviour:
   - towerName: One barrel tower
     details: It is a tower with a single barrel that can shoot bullets.
     isLocked: 0
-    lockedSprite: {fileID: 0}
+    lockedSprite: {fileID: 21300000, guid: 266be075e0312344583d4ee41f2b2485, type: 3}
     requiredLevel: 0
     unlockMessage: 
   - towerName: Long range tower
     details: It can shoot enemies from a long distance
     isLocked: 0
-    lockedSprite: {fileID: 0}
+    lockedSprite: {fileID: 21300000, guid: 0a562543e3d3be847a41d4d4cd067fd9, type: 3}
     requiredLevel: 0
     unlockMessage: 
   - towerName: Roket tower
     details: It can deal explosive damage within an area.
     isLocked: 0
-    lockedSprite: {fileID: 0}
-    requiredLevel: 0
-    unlockMessage: 
-  - towerName: 
-    details: 
-    isLocked: 0
-    lockedSprite: {fileID: 0}
+    lockedSprite: {fileID: 21300000, guid: 8099ba0a0c8c7bf48bfe7be69bee7802, type: 3}
     requiredLevel: 0
     unlockMessage: 
   - towerName: Duel tower
     details: Can shoot 2 bullet at 1 time
     isLocked: 1
-    lockedSprite: {fileID: 0}
+    lockedSprite: {fileID: 21300000, guid: 970f99165bfe58b42a335b2d4ce06629, type: 3}
     requiredLevel: 5
     unlockMessage: 
   - towerName: Fire tower
     details: It can apply a burning effect which causes the enemy to lose health
       over time.
     isLocked: 1
-    lockedSprite: {fileID: 0}
+    lockedSprite: {fileID: 21300000, guid: 53e6b157a6397744fb1f9fef3cf5e437, type: 3}
     requiredLevel: 10
+    unlockMessage: 
+  - towerName: 
+    details: 
+    isLocked: 0
+    lockedSprite: {fileID: 0}
+    requiredLevel: 0
     unlockMessage: 
   enemyDetails:
   - enemyName: Soldier
