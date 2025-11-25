@@ -1,73 +1,203 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class InfoController : MonoBehaviour
 {
+    // CÁC BIẾN UI CHUNG
+    [Header("General UI Panels")]
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private GameObject towerListPanel;
     [SerializeField] private GameObject enemyListPanel;
     [SerializeField] private GameObject towerDetailPanel;
     [SerializeField] private Image towerDetailImage;
     [SerializeField] private TMPro.TextMeshProUGUI towerDetailText;
-    [SerializeField] private Button tower1Button;
-    [SerializeField] private Button tower2Button;
-    [SerializeField] private Button tower3Button;
-    [SerializeField] private Button tower4Button;
-    [SerializeField] private Sprite tower1Sprite;
-    [SerializeField] private Sprite tower2Sprite;
-    [SerializeField] private Sprite tower3Sprite;
-    [SerializeField] private Sprite tower4Sprite;
-    [SerializeField] private Button enemy1Button;
-    [SerializeField] private Button enemy2Button;
-    [SerializeField] private Sprite enemy1Sprite;
-    [SerializeField] private Sprite enemy2Sprite;
+
+    // --- TOWER REFERENCES ---
+    [Header("Tower References (List)")]
+    [Tooltip("Kéo tất cả các nút Tower vào đây theo thứ tự (Tower 1, 2, 3...).")]
+    [SerializeField] private List<Button> towerButtons = new List<Button>();
+
+    [Tooltip("Kéo Sprite của từng Tower (UNLOCKED) vào đây theo đúng thứ tự.")]
+    [SerializeField] private List<Sprite> towerSprites = new List<Sprite>();
+
+    // --- ENEMY REFERENCES ---
+    [Header("Enemy References (List)")]
+    [Tooltip("Kéo tất cả các nút Enemy vào đây theo thứ tự (Enemy 1, 2, 3...).")]
+    [SerializeField] private List<Button> enemyButtons = new List<Button>();
+
+    [Tooltip("Kéo Sprite của từng Enemy vào đây theo đúng thứ tự.")]
+    [SerializeField] private List<Sprite> enemySprites = new List<Sprite>();
+
+    // --- TAB BUTTONS ---
+    [Header("Tab References")]
     [SerializeField] private Button enemyTabButton;
-    [SerializeField] private Button towerTabButton; // Tower Button
+    [SerializeField] private Button towerTabButton;
 
     private bool showingTowers = true;
 
+    // ====================================================================
+    // CẤU TRÚC DỮ LIỆU
+    // ====================================================================
+
+    [System.Serializable]
+    public struct TowerData
+    {
+        public string towerName;
+        [TextArea(3, 10)]
+        public string details;
+
+        [Header("Unlock Settings")]
+        public bool isLocked;
+        [Tooltip("Sprite hiển thị trên nút khi Tower bị khóa.")]
+        public Sprite lockedSprite; // <<< SPRITE KHI BỊ KHÓA
+        public int requiredLevel;
+        public string unlockMessage;
+    }
+
+    [System.Serializable]
+    public struct EnemyData
+    {
+        public string enemyName;
+        [TextArea(3, 10)]
+        public string details;
+    }
+
+    [Header("Tower Data")]
+    [Tooltip("Nhập thông tin chi tiết cho từng Tower.")]
+    [SerializeField] private List<TowerData> towerDetails = new List<TowerData>();
+
+    [Header("Enemy Data")]
+    [Tooltip("Nhập thông tin chi tiết cho từng Enemy. Số lượng phải khớp với Enemy Buttons.")]
+    [SerializeField] private List<EnemyData> enemyDetails = new List<EnemyData>();
+
+    // ====================================================================
+    // START
+    // ====================================================================
+
     void Start()
     {
-        // Assign events to tower buttons
-        tower1Button.onClick.AddListener(() => ShowTowerDetails(1));
-        tower2Button.onClick.AddListener(() => ShowTowerDetails(2));
-        tower3Button.onClick.AddListener(() => ShowTowerDetails(3));
-        tower4Button.onClick.AddListener(() => ShowTowerDetails(4));
+        // Gán sự kiện và thiết lập trạng thái ban đầu cho các nút TOWER
+        for (int i = 0; i < towerButtons.Count; i++)
+        {
+            int towerId = i + 1;
 
-        // Assign events to enemy buttons
-        enemy1Button.onClick.AddListener(() => ShowEnemyDetails(1));
-        enemy2Button.onClick.AddListener(() => ShowEnemyDetails(2));
+            if (towerButtons[i] != null && i < towerDetails.Count)
+            {
+                TowerData data = towerDetails[i];
+                int currentLevel = GetPlayerLevel();
+                bool isUnlockedByLevel = currentLevel >= data.requiredLevel;
+                bool isLocked = data.isLocked && !isUnlockedByLevel;
+
+                if (isLocked)
+                {
+                    // 1. Vô hiệu hóa nút (Không thể click để xây)
+                    towerButtons[i].interactable = false;
+
+                    // 2. Thiết lập Sprite khóa cho nút
+                    if (data.lockedSprite != null)
+                    {
+                        towerButtons[i].GetComponent<Image>().sprite = data.lockedSprite;
+                    }
+
+                    // 3. Gán sự kiện để chỉ hiển thị thông tin khóa, KHÔNG phải logic ShowTowerDetails
+                    towerButtons[i].onClick.AddListener(() => ShowLockedTowerDetails(towerId));
+                }
+                else
+                {
+                    // Đảm bảo nút đã được mở khóa và có thể tương tác
+                    towerButtons[i].interactable = true;
+                    // Gán Sprite mở khóa (nếu cần, để đảm bảo sprite là của unlocked tower)
+                    if (i < towerSprites.Count && towerSprites[i] != null)
+                    {
+                        towerButtons[i].GetComponent<Image>().sprite = towerSprites[i];
+                    }
+                    // Gán sự kiện hiển thị chi tiết Tower thông thường
+                    towerButtons[i].onClick.AddListener(() => ShowTowerDetails(towerId));
+                }
+            }
+        }
+
+        // Gán sự kiện cho các nút ENEMY (Giữ nguyên)
+        for (int i = 0; i < enemyButtons.Count; i++)
+        {
+            int enemyId = i + 1;
+            if (enemyButtons[i] != null)
+            {
+                enemyButtons[i].onClick.AddListener(() => ShowEnemyDetails(enemyId));
+            }
+        }
 
         // Assign events to tab buttons
         enemyTabButton.onClick.AddListener(SwitchToEnemies);
         towerTabButton.onClick.AddListener(SwitchToTowers);
 
-        // Hide the Tower button initially
+        // Thiết lập trạng thái UI ban đầu
         towerTabButton.gameObject.SetActive(false);
         enemyListPanel.SetActive(false);
         towerDetailPanel.SetActive(false);
     }
 
+    // ====================================================================
+    // HÀM MỚI: HIỂN THỊ CHI TIẾT KHI TOWER BỊ KHÓA
+    // ====================================================================
+
+    /// <summary>
+    /// Hiển thị thông tin và sprite của tower bị khóa.
+    /// Hàm này được gán cho các nút bị khóa trong Start().
+    /// </summary>
+    private void ShowLockedTowerDetails(int towerId)
+    {
+        if (!showingTowers) return;
+
+        int index = towerId - 1;
+
+        if (index >= 0 && index < towerDetails.Count)
+        {
+            TowerData data = towerDetails[index];
+            towerDetailPanel.SetActive(true);
+
+            // Gán Sprite Khóa
+            towerDetailImage.sprite = data.lockedSprite;
+
+            // Gán Thông tin Khóa
+            towerDetailText.text = data.towerName + " (LOCKED)\nRequired Level: " + data.requiredLevel
+                                    + "\n" + data.unlockMessage;
+        }
+        else
+        {
+            towerDetailText.text = "Tower " + towerId + ": Data not set up yet!";
+            towerDetailImage.sprite = null;
+        }
+    }
+
+
+    // ====================================================================
+    // HÀM CƠ BẢN (Giữ nguyên)
+    // ====================================================================
+
     public void ShowInfo()
     {
-        if (infoPanel == null || towerListPanel == null || enemyListPanel == null || towerDetailPanel == null ||
-            towerDetailImage == null || towerDetailText == null)
+        if (infoPanel == null)
         {
-            Debug.LogError("One or more references are missing in InfoController!");
+            Debug.LogError("InfoPanel reference is missing in InfoController!");
             return;
         }
         infoPanel.SetActive(true);
-        towerListPanel.SetActive(true); // Show towers initially
+        towerListPanel.SetActive(true);
         enemyListPanel.SetActive(false);
         towerDetailPanel.SetActive(false);
         showingTowers = true;
-        towerTabButton.gameObject.SetActive(false); // Hide the Tower button when Info opens on Tower tab
+        towerTabButton.gameObject.SetActive(false);
     }
 
     public void HideInfo()
     {
-        infoPanel.SetActive(false);
+        if (infoPanel != null)
+        {
+            infoPanel.SetActive(false);
+        }
     }
 
     private void SwitchToEnemies()
@@ -76,7 +206,7 @@ public class InfoController : MonoBehaviour
         enemyListPanel.SetActive(true);
         towerDetailPanel.SetActive(false);
         showingTowers = false;
-        towerTabButton.gameObject.SetActive(true); // Show Tower button when switched to Enemy
+        towerTabButton.gameObject.SetActive(true);
     }
 
     private void SwitchToTowers()
@@ -85,80 +215,81 @@ public class InfoController : MonoBehaviour
         towerListPanel.SetActive(true);
         towerDetailPanel.SetActive(false);
         showingTowers = true;
-        towerTabButton.gameObject.SetActive(false); // Hide Tower button when switched back to Tower
+        towerTabButton.gameObject.SetActive(false);
     }
+
+    private int GetPlayerLevel()
+    {
+        return PlayerPrefs.GetInt("PlayerLevel", 1);
+    }
+
+    // ====================================================================
+    // HIỂN THỊ CHI TIẾT TOWER (MỞ KHÓA)
+    // ====================================================================
 
     private void ShowTowerDetails(int towerId)
     {
-        if (!showingTowers) return; // Only show if on the tower tab
-        towerDetailPanel.SetActive(true);
-        switch (towerId)
+        if (!showingTowers) return;
+
+        int index = towerId - 1;
+
+        if (index >= 0 && index < towerDetails.Count)
         {
-            case 1:
-                towerDetailImage.sprite = tower1Sprite;
-                towerDetailText.text = "Tower 1: Basic Tower\n" +
-                                       "Health: 100\n" +
-                                       "Speed: 1.0s\n" +
-                                       "Damage: 10\n" +
-                                       "Special Ability: None";
-                break;
-            case 2:
-                towerDetailImage.sprite = tower2Sprite;
-                towerDetailText.text = "Tower 2: Advanced Tower\n" +
-                                       "Health: 150\n" +
-                                       "Speed: 0.8s\n" +
-                                       "Damage: 20\n" +
-                                       "Special Ability: Splash Damage";
-                break;
-            case 3:
-                towerDetailImage.sprite = tower3Sprite;
-                towerDetailText.text = "Tower 3: Pro Tower\n" +
-                                       "Health: 200\n" +
-                                       "Speed: 0.6s\n" +
-                                       "Damage: 30\n" +
-                                       "Special Ability: Slow Enemy";
-                break;
-            case 4:
-                if (PlayerPrefs.GetInt("UnlockedTower4", 0) == 1)
-                {
-                    towerDetailImage.sprite = tower4Sprite;
-                    towerDetailText.text = "Tower 4: Ultimate Tower\n" +
-                                           "Health: 300\n" +
-                                           "Speed: 0.4s\n" +
-                                           "Damage: 50\n" +
-                                           "Special Ability: Area Freeze";
-                }
-                else
-                {
-                    towerDetailText.text = "Tower 4: Ultimate Tower (Locked)\nUnlock at Level 10";
-                    towerDetailImage.sprite = null;
-                }
-                break;
+            TowerData data = towerDetails[index];
+            towerDetailPanel.SetActive(true);
+
+            // Gán Sprite Mở Khóa
+            if (index < towerSprites.Count && towerSprites[index] != null)
+            {
+                towerDetailImage.sprite = towerSprites[index];
+            }
+            else
+            {
+                towerDetailImage.sprite = null;
+            }
+
+            // Gán Thông tin chi tiết
+            towerDetailText.text = data.towerName + "\n" + data.details;
+        }
+        else
+        {
+            towerDetailText.text = "Tower " + towerId + ": Data not set up yet in Tower Details List!";
+            towerDetailImage.sprite = null;
         }
     }
 
+    // ====================================================================
+    // HIỂN THỊ CHI TIẾT ENEMY (Giữ nguyên)
+    // ====================================================================
+
     private void ShowEnemyDetails(int enemyId)
     {
-        if (showingTowers) return; // Only show if on the enemy tab
-        towerDetailPanel.SetActive(true);
-        switch (enemyId)
+        if (showingTowers) return;
+
+        int index = enemyId - 1;
+
+        if (index >= 0 && index < enemyDetails.Count)
         {
-            case 1:
-                towerDetailImage.sprite = enemy1Sprite;
-                towerDetailText.text = "Enemy 1: Basic Enemy\n" +
-                                       "Health: 50\n" +
-                                       "Speed: 1.0s\n" +
-                                       "Damage: 5\n" +
-                                       "Special Ability: None";
-                break;
-            case 2:
-                towerDetailImage.sprite = enemy2Sprite;
-                towerDetailText.text = "Enemy 2: Advanced Enemy\n" +
-                                       "Health: 100\n" +
-                                       "Speed: 0.8s\n" +
-                                       "Damage: 10\n" +
-                                       "Special Ability: Armor";
-                break;
+            EnemyData data = enemyDetails[index];
+            towerDetailPanel.SetActive(true);
+
+            // Lấy Sprite
+            if (index < enemySprites.Count && enemySprites[index] != null)
+            {
+                towerDetailImage.sprite = enemySprites[index];
+            }
+            else
+            {
+                towerDetailImage.sprite = null;
+            }
+
+            // Gán Thông tin chi tiết từ EnemyData
+            towerDetailText.text = data.enemyName + "\n" + data.details;
+        }
+        else
+        {
+            towerDetailText.text = "Enemy " + enemyId + ": Data not set up yet in Enemy Details List!";
+            towerDetailImage.sprite = null;
         }
     }
 }
