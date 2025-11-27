@@ -11,12 +11,18 @@ public class IceWaveTower : Tower
     [Tooltip("Thời gian giữa các lần tạo xung kích (tính bằng giây).")]
     [SerializeField] private float _waveDelay = 2.0f;
 
-    // Biến này quyết định kích thước cuối cùng của sóng băng
     [Tooltip("Kích thước tối đa của sóng băng (final scale).")]
     [SerializeField] private float _waveSize = 3.0f;
 
+    // === CÁC MẢNG CHỈ SỐ NÂNG CẤP ===
+    // Cấp 1 (index 0), Cấp 2 (index 1), Cấp 3 (index 2)
+    [Header("Upgrade Stats")]
+    [Tooltip("Sát thương cho Level 1, 2, 3. (1, 2, 3)")]
+    [SerializeField] private float[] _damageByLevel = new float[] { 1f, 2f, 3f };
+    [Tooltip("Lượng làm chậm (0.x) cho Level 1, 2, 3. (0.3, 0.4, 0.5)")]
+    [SerializeField] private float[] _slowAmountByLevel = new float[] { 0.3f, 0.4f, 0.5f };
+
     private float _timeSinceLastWave;
-    // Đã xóa 'private Enemy _targetEnemy;' để tránh lỗi serialization (Giả định nằm ở lớp Tower)
 
     protected override void Start()
     {
@@ -38,7 +44,6 @@ public class IceWaveTower : Tower
 
     private Enemy FindTarget()
     {
-        // SỬ DỤNG GetShootDistance() (Tầm bắn của Tháp) để kiểm tra kích hoạt
         float range = GetShootDistance();
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, range);
 
@@ -60,11 +65,17 @@ public class IceWaveTower : Tower
     {
         if (_iceWaveProjectilePrefab == null)
         {
-            Debug.LogError("IceWaveProjectile Prefab is missing! Please drag the IceWaveProjectile Prefab onto the tower's Inspector slot.");
+            Debug.LogError("IceWaveProjectile Prefab is missing!...");
             return;
         }
 
-        // Kích thước cuối cùng của sóng được lấy từ biến _waveSize
+        // Lấy chỉ số tương ứng với cấp độ hiện tại (CurrentLevel bắt đầu từ 1, mảng bắt đầu từ 0)
+        int index = CurrentLevel - 1;
+
+        // Kiểm tra an toàn
+        float currentDamage = (index >= 0 && index < _damageByLevel.Length) ? _damageByLevel[index] : _damageByLevel[0];
+        float currentSlowAmount = (index >= 0 && index < _slowAmountByLevel.Length) ? _slowAmountByLevel[index] : _slowAmountByLevel[0];
+
         float waveFinalSize = _waveSize;
 
         GameObject waveObject = Instantiate(_iceWaveProjectilePrefab, transform.position, Quaternion.identity);
@@ -72,15 +83,38 @@ public class IceWaveTower : Tower
 
         if (projectile != null)
         {
-            // Truyền kích thước cuối cùng vào Projectile
-            projectile.Initialize(waveFinalSize);
+            // TRUYỀN CÁC CHỈ SỐ ĐÃ NÂNG CẤP VÀO PROJECTILE
+            projectile.Initialize(waveFinalSize, currentDamage, currentSlowAmount);
         }
         else
         {
-            Debug.LogError("IceWaveProjectile component not found on the instantiated prefab! Make sure the Prefab has the script attached.");
+            Debug.LogError("IceWaveProjectile component not found on the instantiated prefab!...");
             Destroy(waveObject);
         }
     }
+
+    // GHI ĐÈ: Lấy Sát thương hiện tại để hiển thị trong Panel
+    public override float GetShootPower()
+    {
+        int index = CurrentLevel - 1;
+        if (index >= 0 && index < _damageByLevel.Length)
+        {
+            return _damageByLevel[index];
+        }
+        return 0;
+    }
+
+    // HÀM MỚI: Lấy Slow Amount hiện tại để hiển thị trong Panel
+    public float GetSlowAmount()
+    {
+        int index = CurrentLevel - 1;
+        if (index >= 0 && index < _slowAmountByLevel.Length)
+        {
+            return _slowAmountByLevel[index];
+        }
+        return 0;
+    }
+
 
     private void OnDrawGizmosSelected()
     {

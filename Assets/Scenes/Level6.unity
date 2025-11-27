@@ -1281,10 +1281,10 @@ MonoBehaviour:
   - {fileID: 123826610}
   - {fileID: 1816069801}
   - {fileID: 642662285}
-  _spawnDelay: 5
+  _spawnDelay: 3
   _bossPrefab: {fileID: 0}
   _maxLives: 5
-  _totalEnemy: 15
+  _totalEnemy: 22
   _panel: {fileID: 876660015}
   _statusInfo: {fileID: 1540418511}
   _livesInfo: {fileID: 589526564}

@@ -22,7 +22,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 970f99165bfe58b42a335b2d4ce06629,
+      objectReference: {fileID: 21300000, guid: 6c05d82bc8342b240a992406f6b262bc,
         type: 3}
     - target: {fileID: 3080038064184856414, guid: fc3f2c1e6a34b51408c68254a94fb798,
         type: 3}
@@ -128,6 +128,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -5440319201587289800}
+    - targetCorrespondingSourceObject: {fileID: 8124858492870805638, guid: fc3f2c1e6a34b51408c68254a94fb798,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 797674019481112553}
   m_SourcePrefab: {fileID: 100100000, guid: fc3f2c1e6a34b51408c68254a94fb798, type: 3}
 --- !u!1 &2687261761282346608 stripped
 GameObject:
@@ -200,6 +204,27 @@ MonoBehaviour:
     type: 3}
   _waveDelay: 3
   _waveSize: 3
+  _damageByLevel:
+  - 1
+  - 2
+  - 3
+  _slowAmountByLevel:
+  - 0.3
+  - 0.4
+  - 0.5
+--- !u!114 &797674019481112553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2687261761282346608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f1f11c93d784c498e203b0f08945ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _requiredLevel: 15
 --- !u!212 &5822840326096597080 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 379634946502194862, guid: fc3f2c1e6a34b51408c68254a94fb798,

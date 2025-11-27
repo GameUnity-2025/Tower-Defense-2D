@@ -7,9 +7,9 @@ public class IceWaveProjectile : MonoBehaviour
     // CÁC BIẾN STATS (GIỮ NGUYÊN)
     [Header("ICE WAVE STATS")]
     [Tooltip("Sát thương cơ bản mỗi khi xung kích chạm.")]
-    [SerializeField] private float _damage = 15f;
+    [SerializeField] private float _damage = 15f; // Giá trị này sẽ bị GHI ĐÈ khi Initialize
     [Tooltip("Phần trăm làm chậm (ví dụ: 0.4f = 40% làm chậm).")]
-    [SerializeField] private float _slowAmount = 0.4f;
+    [SerializeField] private float _slowAmount = 0.4f; // Giá trị này sẽ bị GHI ĐÈ khi Initialize
     [Tooltip("Thời gian làm chậm kéo dài (giây).")]
     [SerializeField] private float _slowDuration = 2.0f;
     [Tooltip("Thời gian tồn tại của sóng băng (thời gian lan rộng).")]
@@ -18,11 +18,8 @@ public class IceWaveProjectile : MonoBehaviour
     [Header("KÍCH THƯỚC & COLLIDER")]
     [Tooltip("Kích thước tối đa mặc định (Width & Height) của Sprite Sliced.")]
     [SerializeField] private float _defaultSpriteSize = 7.0f;
-
     [Tooltip("Kích thước cuối cùng của Box Collider 2D (Ví dụ: 3.0).")]
     [SerializeField] private float _finalColliderSize = 3.0f;
-
-    // <<< BIẾN MỚI: Tốc độ Lan rộng (1.0 là tốc độ bình thường)
     [Tooltip("Hệ số nhân tốc độ lan rộng (1.0 = mặc định). Giá trị cao hơn làm sóng lan nhanh hơn.")]
     [SerializeField] private float _growthSpeedMultiplier = 1.0f;
 
@@ -30,17 +27,21 @@ public class IceWaveProjectile : MonoBehaviour
     [Header("COLLIDER & VISUALS")]
     [Tooltip("Box Collider 2D hoặc Circle Collider 2D của sóng băng.")]
     [SerializeField] private BoxCollider2D _waveCollider;
-
     [Tooltip("Sprite Renderer để hiển thị hình ảnh sóng băng.")]
     [SerializeField] private SpriteRenderer _waveRenderer;
 
     private List<Enemy> _hitEnemies = new List<Enemy>();
     private float _finalSpriteRange;
 
-    public void Initialize(float waveRange)
+    // Hàm Initialize được sửa để nhận Sát thương và Lượng làm chậm
+    public void Initialize(float waveRange, float damage, float slowAmount)
     {
         _hitEnemies.Clear();
         _finalSpriteRange = (waveRange > 0) ? waveRange : _defaultSpriteSize;
+
+        // GÁN CÁC THAM SỐ ĐÃ NÂNG CẤP TỪ THÁP
+        _damage = damage;
+        _slowAmount = slowAmount;
 
         // Đặt kích thước ban đầu về 0
         if (_waveRenderer != null)
@@ -69,8 +70,8 @@ public class IceWaveProjectile : MonoBehaviour
 
         while (timer < duration)
         {
-            timer += Time.deltaTime * _growthSpeedMultiplier; // ÁP DỤNG HỆ SỐ TỐC ĐỘ LAN RỘNG
-            float ratio = timer / duration; // Tỷ lệ từ 0 đến 1
+            timer += Time.deltaTime * _growthSpeedMultiplier;
+            float ratio = timer / duration;
 
             // 1. TÍNH TOÁN VÀ ÁP DỤNG KÍCH THƯỚC SPRITE
             float currentSpriteSize = Mathf.Lerp(0f, _finalSpriteRange, ratio);
@@ -111,10 +112,10 @@ public class IceWaveProjectile : MonoBehaviour
 
             if (enemy != null && !_hitEnemies.Contains(enemy))
             {
-                // 1. Gây Sát Thương
+                // 1. Gây Sát Thương (dùng _damage đã được cập nhật)
                 enemy.ReduceEnemyHealth(Mathf.FloorToInt(_damage));
 
-                // 2. Áp dụng Slow
+                // 2. Áp dụng Slow (dùng _slowAmount đã được cập nhật)
                 if (enemy.gameObject.activeSelf)
                 {
                     enemy.ApplySlow(_slowAmount, _slowDuration);

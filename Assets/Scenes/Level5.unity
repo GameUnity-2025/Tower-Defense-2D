@@ -5902,7 +5902,7 @@ MonoBehaviour:
   _bossPrefab: {fileID: 4472615827600906362, guid: ce427d507ec202044a3001a1e277fc1a,
     type: 3}
   _maxLives: 5
-  _totalEnemy: 2
+  _totalEnemy: 20
   _panel: {fileID: 1047872024}
   _statusInfo: {fileID: 2139557043}
   _livesInfo: {fileID: 776985991}

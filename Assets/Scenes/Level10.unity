@@ -5829,11 +5829,11 @@ MonoBehaviour:
   - {fileID: 1621320389}
   - {fileID: 1896107178}
   - {fileID: 2091952272}
-  _spawnDelay: 5
+  _spawnDelay: 3
   _bossPrefab: {fileID: -97806411721327321, guid: 3fa0c85695ec0164cb4ab43a907516af,
     type: 3}
   _maxLives: 5
-  _totalEnemy: 5
+  _totalEnemy: 32
   _panel: {fileID: 1047872024}
   _statusInfo: {fileID: 2139557043}
   _livesInfo: {fileID: 776985991}

@@ -40,7 +40,7 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
     public int CurrentLevel => _currentLevel;
 
     // === GETTERS ===
-    public int GetShootPower() => Mathf.RoundToInt(_currentPower);
+    public virtual float GetShootPower() => Mathf.RoundToInt(_currentPower);
     public float GetShootDistance() => _currentDistance;
     public float GetShootDelay()
     {

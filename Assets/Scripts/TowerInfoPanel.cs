@@ -23,8 +23,6 @@ public class TowerInfoPanel : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // Đảm bảo Panel bị tắt khi bắt đầu (nếu nó được active trong Editor)
-            // LƯU Ý: Nếu vấn đề vẫn tiếp diễn, hãy chuyển hẳn gameObject.SetActive(false) lên đây.
             if (gameObject.activeSelf) gameObject.SetActive(false);
         }
         else
@@ -35,9 +33,6 @@ public class TowerInfoPanel : MonoBehaviour
 
     public void ShowPanel(Tower tower, Vector3 worldPosition)
     {
-        // 🚨 QUAN TRỌNG: Kiểm tra nếu Panel khác đang mở và đóng nó. (Ví dụ: Panel chọn tháp)
-        // Nếu không có xung đột, tiếp tục.
-
         _currentTower = tower;
         UpdateInfo(tower);
 
@@ -51,15 +46,15 @@ public class TowerInfoPanel : MonoBehaviour
         string displayName = tower.name.Replace("(Clone)", "").Trim();
         _towerName.text = $"{displayName} (Lv.{tower.CurrentLevel})";
 
-        // === LOGIC CẬP NHẬT THÔNG TIN VÀ FIX LỖI FIRE TOWER ===
+        // === LOGIC CẬP NHẬT THÔNG TIN VÀ FIX LỖI FIRE TOWER/ICE TOWER ===
 
-        // Sử dụng 'as' để kiểm tra và ép kiểu an toàn
         FireTower fireTower = tower as FireTower;
+        // KIỂM TRA ICE TOWER
+        IceWaveTower iceTower = tower as IceWaveTower;
 
         if (fireTower != null)
         {
             // FIX: Đảm bảo các hàm chỉ được gọi khi đối tượng FireTower hợp lệ
-            // (Nếu FireTower.cs có lỗi khởi tạo, bạn cần fix trong script đó)
             try
             {
                 float dps = fireTower.GetCurrentBurnDPS();
@@ -71,12 +66,21 @@ public class TowerInfoPanel : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                // Nếu có lỗi, log ra và hiển thị thông tin chung để Panel không bị sập.
-                Debug.LogError($"Lỗi khi truy cập FireTower data lần đầu: {ex.Message}", tower);
+                Debug.LogError($"Lỗi khi truy cập FireTower data: {ex.Message}", tower);
                 _damageText.text = $"Damage: N/A";
                 _rangeText.text = $"Range: N/A";
                 _fireRateText.text = $"Rate: {1f / tower.GetShootDelay():F2}/s (Fallback)";
             }
+        }
+        // LOGIC HIỂN THỊ THÔNG TIN CHO ICE TOWER
+        else if (iceTower != null)
+        {
+            float damage = iceTower.GetShootPower(); // Lấy Damage đã được ghi đè
+            float slowAmount = iceTower.GetSlowAmount(); // Lấy Slow Amount mới
+
+            _damageText.text = $"Damage: {damage:F0}"; // Sát thương là số nguyên
+            _rangeText.text = $"Slow: {(slowAmount * 100):F0}%"; // Hiển thị dưới dạng %
+            _fireRateText.text = $"Rate: {1f / iceTower.GetShootDelay():F2}/s";
         }
         else // Tháp thường
         {
@@ -86,7 +90,6 @@ public class TowerInfoPanel : MonoBehaviour
         }
 
         // === UPGRADE BUTTON ===
-        // Logic này không đổi, nhưng được giữ lại để hoàn chỉnh
         if (tower.CurrentLevel < 3)
         {
             int cost = tower.GetUpgradeCost();

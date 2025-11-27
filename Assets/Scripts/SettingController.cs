@@ -19,12 +19,8 @@ public class SettingController : MonoBehaviour
 
     void Start()
     {
-        // Khởi tạo tốc độ game ban đầu
         Time.timeScale = speedLevels[currentSpeedIndex];
         UpdateSpeedText();
-
-        // Load volume từ Audio Mixer
-        // Giá trị Slider là tuyến tính (0-1), cần chuyển đổi Logarithmic (dB) cho Mixer
         if (musicMixer.GetFloat("Music", out float musicVolume))
             musicSlider.value = Mathf.Pow(10, musicVolume / 20);
         else
@@ -35,7 +31,6 @@ public class SettingController : MonoBehaviour
         else
             sfxSlider.value = 1f;
 
-        // Gán Listener cho các Slider và Button
         musicSlider.onValueChanged.AddListener(SetMusicVolume);
         sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         speedToggleButton.onClick.AddListener(ToggleSpeed);
@@ -46,9 +41,6 @@ public class SettingController : MonoBehaviour
     public void OpenSetting()
     {
         if (settingPanel == null) return;
-
-        // **[ĐÃ SỬA] Đảm bảo Panel hiển thị trên cùng (SetAsLastSibling)**
-        // Việc này đưa Panel về cuối danh sách con của đối tượng cha, vẽ sau cùng, nên hiển thị trên cùng.
         settingPanel.transform.SetAsLastSibling();
 
         settingPanel.SetActive(true);
@@ -60,7 +52,6 @@ public class SettingController : MonoBehaviour
         if (settingPanel != null)
         {
             settingPanel.SetActive(false);
-            // Khôi phục tốc độ game về mức đã chọn trước đó
             Time.timeScale = speedLevels[currentSpeedIndex];
         }
     }
@@ -68,7 +59,6 @@ public class SettingController : MonoBehaviour
     public void SetMusicVolume(float volume)
     {
         if (musicMixer != null)
-            // Chuyển đổi giá trị tuyến tính (0-1) sang dB
             musicMixer.SetFloat("Music", Mathf.Log10(volume) * 20);
         UpdateText();
     }
@@ -76,7 +66,6 @@ public class SettingController : MonoBehaviour
     public void SetSFXVolume(float volume)
     {
         if (musicMixer != null)
-            // Chuyển đổi giá trị tuyến tính (0-1) sang dB
             musicMixer.SetFloat("SFX", Mathf.Log10(volume) * 20);
         UpdateText();
     }
@@ -97,7 +86,6 @@ public class SettingController : MonoBehaviour
 
     public void ToggleSpeed()
     {
-        // Chuyển sang tốc độ tiếp theo (dùng modulo để quay vòng)
         currentSpeedIndex = (currentSpeedIndex + 1) % speedLevels.Length;
         Time.timeScale = speedLevels[currentSpeedIndex];
         UpdateSpeedText();

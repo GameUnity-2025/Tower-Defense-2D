@@ -5816,10 +5816,10 @@ MonoBehaviour:
   - {fileID: 1621320389}
   - {fileID: 1896107178}
   - {fileID: 2091952272}
-  _spawnDelay: 4
+  _spawnDelay: 3
   _bossPrefab: {fileID: 0}
   _maxLives: 5
-  _totalEnemy: 20
+  _totalEnemy: 24
   _panel: {fileID: 1047872024}
   _statusInfo: {fileID: 2139557043}
   _livesInfo: {fileID: 776985991}
