@@ -2,21 +2,20 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using TMPro; // Thêm thư viện Text Mesh Pro cho requiredLevelText
+using TMPro; 
 
 public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    // Tháp mà icon này đại diện
     [HideInInspector] public Tower TowerPrefab;
 
     [Header("Unlock Status UI")]
     [SerializeField] private Image _lockOverlay;
-    [SerializeField] private TMP_Text _requiredLevelText; // Sử dụng TMP_Text
+    [SerializeField] private TMP_Text _requiredLevelText; 
 
     private Image _image;
     private Transform _originalParent;
     private CanvasGroup _canvasGroup;
-    private bool _isLocked = false; // Trạng thái khóa
+    private bool _isLocked = false; 
 
     void Awake()
     {
@@ -28,7 +27,6 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    // Hàm Setup mới, được gọi từ TowerSelectionPanel
     public void Setup(Tower towerPrefab, bool isUnlocked, int requiredLevel)
     {
         TowerPrefab = towerPrefab;
@@ -44,7 +42,6 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             _image.enabled = false;
         }
 
-        // Cập nhật trạng thái và hiển thị UI
         if (_lockOverlay != null)
         {
             _lockOverlay.gameObject.SetActive(_isLocked);
@@ -56,20 +53,16 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             _requiredLevelText.gameObject.SetActive(_isLocked);
         }
 
-        // Điều chỉnh màu sắc icon nếu bị khóa
         if (_image != null)
         {
             _image.color = _isLocked ? new Color(0.5f, 0.5f, 0.5f, 0.7f) : Color.white;
         }
     }
 
-    // --- Các sự kiện Kéo Thả ---
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (_isLocked)
         {
-            // Không cho phép kéo nếu bị khóa
             return;
         }
 

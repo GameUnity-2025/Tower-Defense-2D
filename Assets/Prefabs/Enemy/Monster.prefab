@@ -104,7 +104,8 @@ MonoBehaviour:
   _healthFill: {fileID: 4007222524172987501}
   _burnEffectPrefab: {fileID: 6431008935038505589, guid: b368f17ea3915af4b8ba7d3b5d360c61,
     type: 3}
-  _slowEffectPrefab: {fileID: 0}
+  _slowEffectPrefab: {fileID: 6431008935038505589, guid: 280c97876662ea3458942767668af2c8,
+    type: 3}
   IsSlowed: 0
   IsBurning: 0
 --- !u!1 &6478282514138260796
@@ -270,7 +271,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
-  m_Size: {x: 0.75, y: 0.15}
+  m_Size: {x: 0.6, y: 0.15}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

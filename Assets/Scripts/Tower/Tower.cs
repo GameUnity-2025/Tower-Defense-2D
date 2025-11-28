@@ -120,24 +120,6 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
         if (_towerHead != null) _towerHead.sortingOrder = order + 1;
     }
 
-    // === CLICK/TAP TO SHOW PANEL (MOBILE READY) ===
-
-    // ** LOẠI BỎ HÀM UPDATE CŨ **
-    /*
-    protected void Update()
-    {
-        if (!_isPlaced || !Input.GetMouseButtonDown(0)) return;
-
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Collider2D col = GetComponent<Collider2D>();
-        if (col != null && col.OverlapPoint(mousePos))
-        {
-            TowerInfoPanel.Instance?.ShowPanel(this, transform.position);
-        }
-    }
-    */
-
-    // ** THAY THẾ BẰNG IPointerClickHandler **
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log($"[TOWER TAP] Tower: {gameObject.name} clicked/tapped. _isPlaced: {_isPlaced}");
@@ -165,7 +147,7 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
     }
 
 
-    // === TOWER AI (Giữ nguyên) ===
+    // === TOWER AI  ===
     public void CheckNearestEnemy()
     {
         if (!_isPlaced) return;
@@ -251,10 +233,8 @@ public class Tower : MonoBehaviour, IPointerClickHandler // << IMPLEMENT INTERFA
         IsBurning = burning;
     }
 
-    // Giữ lại Update trống để Tower AI vẫn chạy
     protected void Update()
     {
-        // Chạy các logic Tower AI trong Update hoặc FixedUpdate nếu cần
-        // Logic chọn tháp đã được chuyển sang OnPointerClick
+
     }
 }

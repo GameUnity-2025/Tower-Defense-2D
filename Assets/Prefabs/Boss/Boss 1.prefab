@@ -317,7 +317,11 @@ MonoBehaviour:
   _moveSpeed: 1
   _healthBar: {fileID: 9121806100354499433}
   _healthFill: {fileID: 5664311611511494025}
-  _burnEffectPrefab: {fileID: 0}
+  _burnEffectPrefab: {fileID: 6431008935038505589, guid: b368f17ea3915af4b8ba7d3b5d360c61,
+    type: 3}
+  _slowEffectPrefab: {fileID: 6431008935038505589, guid: 280c97876662ea3458942767668af2c8,
+    type: 3}
+  IsSlowed: 0
   IsBurning: 0
   _bossMaxHealth: 9
   _projectilePrefab: {fileID: 0}

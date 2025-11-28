@@ -144,13 +144,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f626fe14f43df85498d7a4d90400a341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 100
+  _maxHealth: 20
   _moveSpeed: 1
-  _healthBar: {fileID: 0}
-  _healthFill: {fileID: 0}
-  _burnEffectPrefab: {fileID: 0}
+  _healthBar: {fileID: 4937059904937094792}
+  _healthFill: {fileID: 6001924881376338830}
+  _burnEffectPrefab: {fileID: 6431008935038505589, guid: b368f17ea3915af4b8ba7d3b5d360c61,
+    type: 3}
+  _slowEffectPrefab: {fileID: 6431008935038505589, guid: 280c97876662ea3458942767668af2c8,
+    type: 3}
+  IsSlowed: 0
   IsBurning: 0
-  _bossMaxHealth: 500
+  _bossMaxHealth: 20
   _projectilePrefab: {fileID: 0}
   _attackRate: 1.5
   _projectileSpeed: 3

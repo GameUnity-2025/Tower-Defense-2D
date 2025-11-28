@@ -47,11 +47,10 @@ public class InfoController : MonoBehaviour
         public string towerName;
         [TextArea(3, 10)]
         public string details;
-
-        [Header("Unlock Settings")]
+        [Tooltip("Bật (True) để luôn khóa Tower này, bất kể cấp độ người chơi.")]
         public bool isLocked;
         [Tooltip("Sprite hiển thị trên nút khi Tower bị khóa.")]
-        public Sprite lockedSprite; // <<< SPRITE KHI BỊ KHÓA
+        public Sprite lockedSprite;
         public int requiredLevel;
         public string unlockMessage;
     }
@@ -78,59 +77,23 @@ public class InfoController : MonoBehaviour
 
     void Start()
     {
-        // Gán sự kiện và thiết lập trạng thái ban đầu cho các nút TOWER
-        for (int i = 0; i < towerButtons.Count; i++)
-        {
-            int towerId = i + 1;
+        InitializeUI();
 
-            if (towerButtons[i] != null && i < towerDetails.Count)
-            {
-                TowerData data = towerDetails[i];
-                int currentLevel = GetPlayerLevel();
-                bool isUnlockedByLevel = currentLevel >= data.requiredLevel;
-                bool isLocked = data.isLocked && !isUnlockedByLevel;
-
-                if (isLocked)
-                {
-                    // 1. Vô hiệu hóa nút (Không thể click để xây)
-                    towerButtons[i].interactable = false;
-
-                    // 2. Thiết lập Sprite khóa cho nút
-                    if (data.lockedSprite != null)
-                    {
-                        towerButtons[i].GetComponent<Image>().sprite = data.lockedSprite;
-                    }
-
-                    // 3. Gán sự kiện để chỉ hiển thị thông tin khóa, KHÔNG phải logic ShowTowerDetails
-                    towerButtons[i].onClick.AddListener(() => ShowLockedTowerDetails(towerId));
-                }
-                else
-                {
-                    // Đảm bảo nút đã được mở khóa và có thể tương tác
-                    towerButtons[i].interactable = true;
-                    // Gán Sprite mở khóa (nếu cần, để đảm bảo sprite là của unlocked tower)
-                    if (i < towerSprites.Count && towerSprites[i] != null)
-                    {
-                        towerButtons[i].GetComponent<Image>().sprite = towerSprites[i];
-                    }
-                    // Gán sự kiện hiển thị chi tiết Tower thông thường
-                    towerButtons[i].onClick.AddListener(() => ShowTowerDetails(towerId));
-                }
-            }
-        }
-
-        // Gán sự kiện cho các nút ENEMY (Giữ nguyên)
+        // Gán sự kiện cho các nút ENEMY
         for (int i = 0; i < enemyButtons.Count; i++)
         {
             int enemyId = i + 1;
             if (enemyButtons[i] != null)
             {
+                enemyButtons[i].onClick.RemoveAllListeners();
                 enemyButtons[i].onClick.AddListener(() => ShowEnemyDetails(enemyId));
             }
         }
 
         // Assign events to tab buttons
+        enemyTabButton.onClick.RemoveAllListeners();
         enemyTabButton.onClick.AddListener(SwitchToEnemies);
+        towerTabButton.onClick.RemoveAllListeners();
         towerTabButton.onClick.AddListener(SwitchToTowers);
 
         // Thiết lập trạng thái UI ban đầu
@@ -140,12 +103,75 @@ public class InfoController : MonoBehaviour
     }
 
     // ====================================================================
+    // HÀM KHỞI TẠO VÀ CẬP NHẬT TRẠNG THÁI TOWER
+    // ====================================================================
+
+    private void InitializeUI()
+    {
+        int currentLevel = GetPlayerLevel();
+
+        // Gán sự kiện và thiết lập trạng thái ban đầu cho các nút TOWER
+        for (int i = 0; i < towerButtons.Count; i++)
+        {
+            int towerId = i + 1;
+
+            if (towerButtons[i] != null && i < towerDetails.Count)
+            {
+                // LUÔN XÓA CÁC LISTENER CŨ trước khi gán mới
+                towerButtons[i].onClick.RemoveAllListeners();
+
+                TowerData data = towerDetails[i];
+
+                // 1. Kiểm tra điều kiện mở khóa dựa trên cấp độ:
+                bool isUnlockedByLevel = currentLevel >= data.requiredLevel;
+
+                // 2. LOGIC ĐÃ SỬA LỖI:
+                // Tower bị khóa nếu: (Nó được đánh dấu LUÔN KHÓA trong Inspector) HOẶC (người chơi chưa đạt cấp độ yêu cầu)
+                bool isCurrentlyLocked = data.isLocked || !isUnlockedByLevel;
+
+                if (isCurrentlyLocked)
+                {
+                    // 1. Vô hiệu hóa nút
+                    towerButtons[i].interactable = false;
+
+                    // 2. Thiết lập Sprite khóa
+                    if (data.lockedSprite != null)
+                    {
+                        towerButtons[i].GetComponent<Image>().sprite = data.lockedSprite;
+                    }
+                    else if (i < towerSprites.Count)
+                    {
+                        towerButtons[i].GetComponent<Image>().sprite = towerSprites[i];
+                    }
+
+                    // 3. Gán sự kiện chỉ hiển thị thông tin khóa
+                    towerButtons[i].onClick.AddListener(() => ShowLockedTowerDetails(towerId));
+                }
+                else
+                {
+                    // Đã mở khóa
+                    towerButtons[i].interactable = true;
+
+                    // Gán Sprite mở khóa
+                    if (i < towerSprites.Count && towerSprites[i] != null)
+                    {
+                        towerButtons[i].GetComponent<Image>().sprite = towerSprites[i];
+                    }
+
+                    // Gán sự kiện hiển thị chi tiết Tower thông thường
+                    towerButtons[i].onClick.AddListener(() => ShowTowerDetails(towerId));
+                }
+            }
+        }
+    }
+
+
+    // ====================================================================
     // HÀM MỚI: HIỂN THỊ CHI TIẾT KHI TOWER BỊ KHÓA
     // ====================================================================
 
     /// <summary>
     /// Hiển thị thông tin và sprite của tower bị khóa.
-    /// Hàm này được gán cho các nút bị khóa trong Start().
     /// </summary>
     private void ShowLockedTowerDetails(int towerId)
     {
@@ -163,7 +189,7 @@ public class InfoController : MonoBehaviour
 
             // Gán Thông tin Khóa
             towerDetailText.text = data.towerName + " (LOCKED)\nRequired Level: " + data.requiredLevel
-                                    + "\n" + data.unlockMessage;
+                                     + "\n" + data.unlockMessage;
         }
         else
         {
@@ -174,7 +200,7 @@ public class InfoController : MonoBehaviour
 
 
     // ====================================================================
-    // HÀM CƠ BẢN (Giữ nguyên)
+    // HÀM CƠ BẢN 
     // ====================================================================
 
     public void ShowInfo()
@@ -184,6 +210,10 @@ public class InfoController : MonoBehaviour
             Debug.LogError("InfoPanel reference is missing in InfoController!");
             return;
         }
+
+        // Khởi tạo lại trạng thái UI mỗi khi panel được mở
+        InitializeUI();
+
         infoPanel.SetActive(true);
         towerListPanel.SetActive(true);
         enemyListPanel.SetActive(false);
@@ -220,6 +250,7 @@ public class InfoController : MonoBehaviour
 
     private int GetPlayerLevel()
     {
+        // Sử dụng key "PlayerLevel" như trong code gốc của bạn
         return PlayerPrefs.GetInt("PlayerLevel", 1);
     }
 
@@ -259,7 +290,7 @@ public class InfoController : MonoBehaviour
     }
 
     // ====================================================================
-    // HIỂN THỊ CHI TIẾT ENEMY (Giữ nguyên)
+    // HIỂN THỊ CHI TIẾT ENEMY
     // ====================================================================
 
     private void ShowEnemyDetails(int enemyId)

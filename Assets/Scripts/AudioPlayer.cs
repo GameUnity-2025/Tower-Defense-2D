@@ -7,26 +7,24 @@ public class AudioPlayer : MonoBehaviour
 {
     private static AudioPlayer _instance = null;
 
-    [SerializeField] private AudioSource _audioSource; // AudioSource cho SFX
-    [SerializeField] private List<AudioClip> _audioClips; // Danh sách AudioClip cho SFX
-    [SerializeField] private AudioSource _musicAudioSource; // AudioSource dành cho Music
-    [SerializeField] private List<AudioClip> _musicClips; // Danh sách AudioClip cho Music
-    [SerializeField] private Slider _musicSlider; // Slider để điều chỉnh âm lượng Music
+    [SerializeField] private AudioSource _audioSource; 
+    [SerializeField] private List<AudioClip> _audioClips; 
+    [SerializeField] private AudioSource _musicAudioSource; 
+    [SerializeField] private List<AudioClip> _musicClips; 
+    [SerializeField] private Slider _musicSlider; 
 
     void Start()
     {
         if (_musicAudioSource != null && _musicSlider != null)
-        {
-            // Khởi tạo âm lượng từ slider (giá trị mặc định 1.0 nếu không có)
+        {       
             _musicAudioSource.volume = _musicSlider.value;
-            _musicSlider.onValueChanged.AddListener(SetMusicVolume); // Gắn sự kiện khi kéo slider
-            PlayMusic(); // Phát nhạc mặc định khi khởi động
+            _musicSlider.onValueChanged.AddListener(SetMusicVolume); 
+            PlayMusic();
         }
     }
 
     void Update()
     {
-        // Không cần thêm logic ở đây trừ khi bạn muốn kiểm soát khác
     }
 
     public static AudioPlayer Instance
@@ -55,7 +53,7 @@ public class AudioPlayer : MonoBehaviour
     {
         if (_musicAudioSource != null && _musicClips != null && _musicClips.Count > 0)
         {
-            _musicAudioSource.clip = _musicClips[0]; // Chơi clip nhạc đầu tiên, có thể mở rộng để chọn ngẫu nhiên
+            _musicAudioSource.clip = _musicClips[0]; 
             _musicAudioSource.Play();
         }
     }
@@ -64,7 +62,7 @@ public class AudioPlayer : MonoBehaviour
     {
         if (_musicAudioSource != null)
         {
-            _musicAudioSource.volume = volume; // Đặt âm lượng trực tiếp từ slider (0-1)
+            _musicAudioSource.volume = volume; 
             Debug.Log("Đã đặt âm lượng Music: " + volume);
         }
     }

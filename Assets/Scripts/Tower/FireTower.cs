@@ -10,7 +10,8 @@ public class FireTower : Tower
     [SerializeField] private float _flameBurstDelay = 0.1f;
     [SerializeField] private float _flameParticleScale = 1f;
 
-    // ** LƯU Ý: Các mảng này đã được chuyển sang FireBullet.cs **
+    [Tooltip("Khoảng cách nhỏ mà đạn lửa được sinh ra ngoài tâm tháp.")]
+    [SerializeField] private float _spawnOffset = 0.2f;
 
     private bool _isBursting = false;
 
@@ -19,11 +20,28 @@ public class FireTower : Tower
         base.Start();
     }
 
-    // ** KHÔNG CẦN CÁC HÀM GET NÀY NỮA, chúng đã được chuyển sang FireBullet **
-    // public float GetCurrentBurnDPS() { ... }
-    // public float GetCurrentBurnDuration() { ... }
-    // Tuy nhiên, chúng ta cần tái tạo lại các hàm GET này để TowerInfoPanel có thể hiển thị. 
-    // Chúng ta sẽ gọi FireBullet prefab để lấy thông tin.
+    // CÁC HÀM GET NÀY BẮT BUỘC PHẢI TỒN TẠI ĐỂ TowerInfoPanel HIỂN THỊ
+    // (Giữ nguyên như code cũ của bạn vì chúng đã đúng logic)
+    public float GetCurrentBurnDPS()
+    {
+        // Phải đảm bảo _bulletPrefab là FireBullet để tránh lỗi
+        FireBullet prefab = _bulletPrefab as FireBullet;
+        if (prefab != null)
+        {
+            return prefab.GetDPSForLevel(CurrentLevel);
+        }
+        return 0f;
+    }
+
+    public float GetCurrentBurnDuration()
+    {
+        FireBullet prefab = _bulletPrefab as FireBullet;
+        if (prefab != null)
+        {
+            return prefab.GetDurationForLevel(CurrentLevel);
+        }
+        return 0f;
+    }
 
     public override void ShootTarget()
     {
@@ -66,14 +84,19 @@ public class FireTower : Tower
 
             if (bullet != null)
             {
-                bullet.transform.position = transform.position;
+                // TÍNH TOÁN HƯỚNG VÀ VỊ TRÍ SPAWN MỚI
+                Vector3 directionVector = Quaternion.Euler(0, 0, angle) * Vector3.up;
+
+                // ĐẶT VỊ TRÍ BẮN RA XA TÂM THÁP MỘT CHÚT
+                bullet.transform.position = transform.position + directionVector * _spawnOffset;
+
                 bullet.transform.rotation = Quaternion.Euler(0, 0, angle);
 
                 FireBullet fireBullet = bullet.GetComponent<FireBullet>();
 
                 float speed = _bulletSpeed * 0.8f;
 
-                // ** TRUYỀN CẤP ĐỘ THÁP VÀO BULLET **
+                // TRUYỀN CẤP ĐỘ THÁP VÀO BULLET
                 if (fireBullet != null)
                 {
                     fireBullet.SetTowerLevel(currentLevel);
@@ -90,28 +113,6 @@ public class FireTower : Tower
         _isBursting = false;
     }
 
-    // CÁC HÀM GET MỚI CHO TowerInfoPanel
-    public float GetCurrentBurnDPS()
-    {
-        FireBullet prefab = _bulletPrefab as FireBullet;
-        if (prefab != null)
-        {
-            // Lấy DPS từ prefab (giả định FireBullet có logic này)
-            return prefab.GetDPSForLevel(CurrentLevel);
-        }
-        return 0f;
-    }
-
-    public float GetCurrentBurnDuration()
-    {
-        FireBullet prefab = _bulletPrefab as FireBullet;
-        if (prefab != null)
-        {
-            // Lấy Duration từ prefab
-            return prefab.GetDurationForLevel(CurrentLevel);
-        }
-        return 0f;
-    }
     private void OnDrawGizmosSelected()
     {
         if (!_isPlaced) return;
