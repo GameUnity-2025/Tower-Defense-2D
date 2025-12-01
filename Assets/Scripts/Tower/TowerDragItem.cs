@@ -2,20 +2,25 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using TMPro; 
+using TMPro;
 
 public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [HideInInspector] public Tower TowerPrefab;
 
     [Header("Unlock Status UI")]
-    [SerializeField] private Image _lockOverlay;
-    [SerializeField] private TMP_Text _requiredLevelText; 
+    // Loại bỏ Image _lockOverlay
+    [SerializeField] private TMP_Text _requiredLevelText;
+
+    // THÊM BIẾN NÀY ĐỂ KÉO SPRITE KHÓA VÀO TRONG INSPECTOR
+    [Tooltip("Sprite sẽ thay thế icon Tower khi item này bị khóa.")]
+    [SerializeField] private Sprite _lockedItemSprite; // <--- BIẾN MỚI CHO TRẠNG THÁI KHÓA
 
     private Image _image;
     private Transform _originalParent;
     private CanvasGroup _canvasGroup;
-    private bool _isLocked = false; 
+    private bool _isLocked = false;
+    private Sprite _unlockedSprite; // Lưu trữ sprite gốc khi mở khóa
 
     void Awake()
     {
@@ -32,9 +37,11 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         TowerPrefab = towerPrefab;
         _isLocked = !isUnlocked;
 
+        // 1. CẤU HÌNH SPRITE GỐC
         if (towerPrefab != null)
         {
-            _image.sprite = towerPrefab.GetTowerHeadIcon();
+            // Lấy và lưu trữ Sprite gốc (Sprite của Tower Head)
+            _unlockedSprite = towerPrefab.GetTowerHeadIcon();
             _image.enabled = true;
         }
         else
@@ -42,21 +49,36 @@ public class TowerDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             _image.enabled = false;
         }
 
-        if (_lockOverlay != null)
+        // 2. THAY THẾ SPRITE DỰA TRÊN TRẠNG THÁI KHÓA
+        if (_isLocked)
         {
-            _lockOverlay.gameObject.SetActive(_isLocked);
+            // Thay thế hình ảnh Tower bằng hình ảnh Khóa
+            if (_lockedItemSprite != null)
+            {
+                _image.sprite = _lockedItemSprite;
+            }
+            // Đảm bảo item bị khóa không bị làm mờ thêm
+            _image.color = Color.white;
+        }
+        else
+        {
+            // Sử dụng hình ảnh Tower gốc (đã lưu ở bước 1)
+            _image.sprite = _unlockedSprite;
+            _image.color = Color.white;
         }
 
+
+        // 3. HIỂN THỊ CẤP ĐỘ YÊU CẦU
         if (_requiredLevelText != null)
         {
+            // Chỉ hiển thị cấp độ yêu cầu khi bị khóa
             _requiredLevelText.text = $"Lv {requiredLevel}";
             _requiredLevelText.gameObject.SetActive(_isLocked);
         }
 
-        if (_image != null)
-        {
-            _image.color = _isLocked ? new Color(0.5f, 0.5f, 0.5f, 0.7f) : Color.white;
-        }
+        // Cài đặt lại khả năng tương tác (chỉ để đề phòng)
+        _canvasGroup.alpha = 1f;
+        _canvasGroup.blocksRaycasts = true;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
