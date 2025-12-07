@@ -45,6 +45,8 @@ public class LevelManager : MonoBehaviour
     public bool IsOver { get; private set; }
     [SerializeField] private int _maxLives = 3; // Mặc định là 3 máu
     [SerializeField] private int _totalEnemy = 15;
+
+    // UI Panel và Thông tin
     [SerializeField] private GameObject _panel; // Panel Game Over/Victory
     [SerializeField] private Text _statusInfo;
     [SerializeField] private Text _livesInfo;
@@ -55,21 +57,17 @@ public class LevelManager : MonoBehaviour
     [Header("Tower Unlock Notification")]
     [Tooltip("Panel con chứa thông báo mở khóa (vd: 'NEW TOWER UNLOCKED').")]
     [SerializeField] private GameObject _unlockNotificationPanel;
-
     [SerializeField] private Image _towerImageUI;
     [SerializeField] private TMP_Text _messageTextUI;
 
-    // ** Cơ chế Đánh giá Sao **
-    [Header("Star Rating Logic")]
-    private int _currentStarRating = 0; // Số sao đạt được trong lượt chơi hiện tại
-
-    // ********** THÊM THAM CHIẾU UI SAO CHO PANEL VICTORY **********
-    [Header("Victory Star UI")]
+    // ** Cơ chế Đánh giá Sao & UI **
+    [Header("Star Rating Logic & UI")]
     [Tooltip("Kéo 3 Game Object đại diện cho 3 sao (sao 1, sao 2, sao 3) vào đây.")]
     [SerializeField] private GameObject[] _victoryStarObjects = new GameObject[3];
+    [Tooltip("Kéo nút chuyển sang Level tiếp theo vào đây.")]
+    [SerializeField] private GameObject _nextLevelButton; // <<< ĐÃ THÊM
 
-    // *************************************************************
-
+    private int _currentStarRating = 0; // Số sao đạt được trong lượt chơi hiện tại
     private int _currentLives;
     private int _enemyCounter;
 
@@ -105,6 +103,7 @@ public class LevelManager : MonoBehaviour
         if (_panel != null) _panel.SetActive(false);
         if (_unlockNotificationPanel != null) _unlockNotificationPanel.SetActive(false);
         if (_towerImageUI != null) _towerImageUI.gameObject.SetActive(false);
+        if (_nextLevelButton != null) _nextLevelButton.SetActive(false); // Tắt nút Next Level khi bắt đầu
 
         // Đảm bảo sao trên panel victory bị tắt khi Start
         foreach (GameObject star in _victoryStarObjects)
@@ -424,6 +423,14 @@ public class LevelManager : MonoBehaviour
             Debug.LogError("GAME OVER PANEL (_panel) IS NOT ASSIGNED IN THE INSPECTOR!");
         }
 
+        // ********** LOGIC ẨN/HIỆN NÚT CHUYỂN TIẾP (FIXED) **********
+        if (_nextLevelButton != null)
+        {
+            // Chỉ bật nút chuyển tiếp level khi thắng
+            _nextLevelButton.SetActive(win);
+        }
+        // **********************************************************
+
         if (win)
         {
             int currentLevel = SceneManager.GetActiveScene().buildIndex;
@@ -433,16 +440,16 @@ public class LevelManager : MonoBehaviour
             // **********************************************
             _currentStarRating = 0;
 
-            // Logic tính toán sao dựa trên 3 máu (maxLives)
+            // Logic tính toán sao dựa trên số máu còn lại
             if (_currentLives == _maxLives) // Máu còn 3/3
             {
                 _currentStarRating = 3;
             }
-            else if (_currentLives >= 2) // Máu còn 2
+            else if (_currentLives == _maxLives - 1) // Máu còn 2/3
             {
                 _currentStarRating = 2;
             }
-            else if (_currentLives >= 1) // Máu còn 1
+            else if (_currentLives >= 1) // Máu còn 1/3
             {
                 _currentStarRating = 1;
             }
@@ -463,7 +470,6 @@ public class LevelManager : MonoBehaviour
             }
 
             // ********** HIỂN THỊ SAO TRÊN PANEL VICTORY **********
-            // i=0 là sao 1, i=1 là sao 2, i=2 là sao 3
             for (int i = 0; i < _victoryStarObjects.Length; i++)
             {
                 if (_victoryStarObjects[i] != null)
@@ -473,7 +479,6 @@ public class LevelManager : MonoBehaviour
                 }
             }
             // ******************************************************
-            // **********************************************
 
             // Lưu trạng thái level đã hoàn thành (LastLevel và MaxCompletedLevel)
             int maxCompletedLevelBefore = PlayerPrefs.GetInt("MaxCompletedLevel", 0);

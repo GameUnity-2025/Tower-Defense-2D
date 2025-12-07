@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; // Cần thiết nếu chưa có
+using System.Collections.Generic;
 
 public class FireBullet : Bullet
 {
@@ -23,9 +23,18 @@ public class FireBullet : Bullet
     private Vector2 _direction;
     private int _debugDamageCount = 0;
 
+    // BIẾN THAM CHIẾU COLLIDER ĐỂ TẮT KHI VỀ POOL (QUAN TRỌNG)
+    private Collider2D _bulletCollider;
+
     // Property chỉ đọc để tính DPS/Duration dựa trên cấp độ hiện tại
     private float CurrentBurnDPS => GetDPSForLevel(_towerLevel);
     private float CurrentBurnDuration => GetDurationForLevel(_towerLevel);
+
+    private void Awake()
+    {
+        // Lấy Collider 2D khi khởi tạo để sử dụng sau này
+        _bulletCollider = GetComponent<Collider2D>();
+    }
 
     // === HÀM GET ĐỂ TOWER/UI TRUY CẬP ===
     public float GetDPSForLevel(int level)
@@ -52,6 +61,13 @@ public class FireBullet : Bullet
     protected override void OnEnable()
     {
         base.OnEnable();
+
+        // BẬT COLLIDER KHI ĐƯỢC KÍCH HOẠT TỪ POOL
+        if (_bulletCollider != null)
+        {
+            _bulletCollider.enabled = true;
+        }
+
         // RẤT QUAN TRỌNG: Loại bỏ logic tìm kiếm mục tiêu của Bullet
         _targetEnemy = null;
 
@@ -85,7 +101,8 @@ public class FireBullet : Bullet
 
         if (_travelledDistance >= _maxTravelDistance)
         {
-            gameObject.SetActive(false);
+            // GỌI HÀM ĐỂ TẮT COLLIDER VÀ VỀ POOL
+            DisableBullet();
         }
     }
 
@@ -98,19 +115,26 @@ public class FireBullet : Bullet
             Enemy enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
             {
-                // ** SỬ DỤNG GIÁ TRỊ TỰ TÍNH TOÁN **
+                // SỬ DỤNG GIÁ TRỊ TỰ TÍNH TOÁN
                 enemy.ApplyBurnEffect(CurrentBurnDuration, CurrentBurnDPS);
             }
         }
     }
-    private void OnDrawGizmos()
 
+    // HÀM MỚI: Quản lý việc tắt đạn và Collider
+    private void DisableBullet()
     {
-
-        Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
-
-        Gizmos.DrawSphere(transform.position, _damageRadius); // Vẽ vòng tròn này
-
+        // TẮT COLLIDER TRƯỚC KHI TẮT OBJECT
+        if (_bulletCollider != null)
+        {
+            _bulletCollider.enabled = false;
+        }
+        gameObject.SetActive(false);
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
+        Gizmos.DrawSphere(transform.position, _damageRadius);
+    }
 }

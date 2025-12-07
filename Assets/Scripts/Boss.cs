@@ -46,7 +46,6 @@ public class Boss : Enemy
 
     protected override void Update()
     {
-        // **BẮT BUỘC:** Gọi hàm Update của lớp cha để xử lý DOT
         base.Update();
 
         MoveToTarget();

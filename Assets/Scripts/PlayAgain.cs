@@ -1,28 +1,34 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO; // Thêm thư viện này cho Path
 
 public class PlayAgain : MonoBehaviour
 {
     // REPLAY CURRENT LEVEL
     public void PlayAgainFuntion()
     {
+        // Vẫn hoạt động tốt
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // LOAD NEXT LEVEL (AUTOMATICALLY)
+    // LOAD NEXT LEVEL (Sử dụng Build Index)
     public void NextLevel()
     {
-        int currentLevel = SceneManager.GetActiveScene().buildIndex;
-        int nextLevel = currentLevel + 1;
-        string sceneName = "Level" + nextLevel;
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextLevelIndex = currentLevelIndex + 1;
 
-        if (SceneExistsInBuild(sceneName))
+        // Tổng số scene đã thêm vào Build Settings (bao gồm cả Menu)
+        int totalScenesInBuild = SceneManager.sceneCountInBuildSettings;
+
+        if (nextLevelIndex < totalScenesInBuild)
         {
-            SceneManager.LoadScene(sceneName);
+            // Tải Scene tiếp theo bằng Build Index
+            SceneManager.LoadScene(nextLevelIndex);
         }
         else
         {
-            SceneManager.LoadScene("Main"); // Back to menu if all levels are finished
+            // Quay về Menu nếu không còn level nào
+            SceneManager.LoadScene("Main");
         }
     }
 
@@ -32,15 +38,5 @@ public class PlayAgain : MonoBehaviour
         SceneManager.LoadScene("Main");
     }
 
-    // CHECK IF SCENE EXISTS IN BUILD SETTINGS
-    private bool SceneExistsInBuild(string sceneName)
-    {
-        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-        {
-            string path = SceneUtility.GetScenePathByBuildIndex(i);
-            string name = System.IO.Path.GetFileNameWithoutExtension(path);
-            if (name == sceneName) return true;
-        }
-        return false;
-    }
+ 
 }

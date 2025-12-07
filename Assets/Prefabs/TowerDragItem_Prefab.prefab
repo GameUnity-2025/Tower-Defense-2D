@@ -89,3 +89,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TowerPrefab: {fileID: 0}
+  _requiredLevelText: {fileID: 0}
+  _lockedItemSprite: {fileID: 21300000, guid: 92e93479225db6f40b41391deb1c5b9f, type: 3}

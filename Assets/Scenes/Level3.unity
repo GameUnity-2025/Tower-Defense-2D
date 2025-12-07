@@ -5723,6 +5723,7 @@ MonoBehaviour:
   - {fileID: 1435863546}
   - {fileID: 1711592636}
   - {fileID: 1719206323}
+  _nextLevelButton: {fileID: 0}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
@@ -7296,7 +7297,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: 219925235
   m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &1840565200

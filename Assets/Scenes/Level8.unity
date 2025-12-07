@@ -5708,10 +5708,10 @@ MonoBehaviour:
   - {fileID: 1621320389}
   - {fileID: 1896107178}
   - {fileID: 2091952272}
-  _spawnDelay: 4
+  _spawnDelay: 3
   _bossPrefab: {fileID: 0}
   _maxLives: 5
-  _totalEnemy: 25
+  _totalEnemy: 26
   _panel: {fileID: 1047872024}
   _statusInfo: {fileID: 2139557043}
   _livesInfo: {fileID: 776985991}
@@ -5724,6 +5724,7 @@ MonoBehaviour:
   - {fileID: 593119597}
   - {fileID: 1665433434}
   - {fileID: 1835236809}
+  _nextLevelButton: {fileID: 0}
   _initialEnergy: 50
   _energyIncreasePerSecond: 10
   _energyFromEnemy: 20
@@ -7163,8 +7164,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 1
+  m_SortingLayerID: 219925235
+  m_SortingOrder: 3
   m_TargetDisplay: 0
 --- !u!224 &1840565200
 RectTransform:
