@@ -10,12 +10,15 @@ public class Boss : Enemy
     [SerializeField] private float _projectileSpeed = 3f;
 
     private float _attackTimer;
-    private Vector2 _originalHealthBarSize = new Vector2(0.75f, 0.15f);
+    //private Vector2 _originalHealthBarSize = new Vector2(0.75f, 0.15f);
+
+    private Vector3 _originalHealthBarScale = Vector3.one;
 
     private void Awake()
     {
         if (_healthBar != null)
-            _originalHealthBarSize = _healthBar.size;
+            //_originalHealthBarSize = _healthBar.size;
+            _originalHealthBarScale = _healthBar.transform.localScale;
     }
 
     protected override void OnEnable()
@@ -23,16 +26,25 @@ public class Boss : Enemy
         _maxHealth = _bossMaxHealth;
         base.OnEnable();
 
-        if (_healthBar != null && _healthFill != null)
+        //if (_healthBar != null && _healthFill != null)
+        //{
+        //    float scale = _maxHealth / 100f;
+        //    _healthBar.size = new Vector2(_originalHealthBarSize.x * scale, _originalHealthBarSize.y);
+        //    _healthFill.size = _healthBar.size;
+        //}
+
+        if (_healthBar != null)
         {
-            float scale = _maxHealth / 100f;
-            _healthBar.size = new Vector2(_originalHealthBarSize.x * scale, _originalHealthBarSize.y);
-            _healthFill.size = _healthBar.size;
+            float scaleFactor = _maxHealth / 100f;
+            var s = _originalHealthBarScale;
+            s.x *= scaleFactor;
+            _healthBar.transform.localScale = s;
         }
+
         _attackTimer = 0f;
     }
 
-    protected new void Update()
+    protected override void Update()
     {
         // **BẮT BUỘC:** Gọi hàm Update của lớp cha để xử lý DOT
         base.Update();

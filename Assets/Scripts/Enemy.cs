@@ -5,14 +5,17 @@ public class Enemy : MonoBehaviour
 {
     [Header("=== ENEMY STATS ===")]
     [SerializeField] protected int _maxHealth = 100;
+
     [SerializeField] protected float _moveSpeed = 1f;
 
     [Header("=== UI/HEALTH ===")]
     [SerializeField] protected SpriteRenderer _healthBar;
+
     [SerializeField] protected SpriteRenderer _healthFill;
 
     [Header("=== EFFECTS ===")]
     [SerializeField] private GameObject _burnEffectPrefab;
+
     private GameObject _activeBurnEffect;
 
     [HideInInspector] public bool IsBurning = false;
@@ -27,13 +30,32 @@ public class Enemy : MonoBehaviour
     public int CurrentPathIndex { get; private set; }
     public int CurrentHealth => _currentHealth;
 
+    // scale gốc lấy từ prefab
+    private Vector3 _healthFillBaseScale = Vector3.one;
+
+    [SerializeField] private Vector3 _healthBarOffset = new Vector3(0f, 0.5f, 0f);
+
+    private void Awake()
+    {
+        if (_healthFill != null)
+            _healthFillBaseScale = _healthFill.transform.localScale; // chính là chiều dài bạn set trong prefab
+    }
+
     protected virtual void OnEnable()
     {
         _currentHealth = _maxHealth;
         _baseMoveSpeed = _moveSpeed;
 
-        if (_healthFill != null && _healthBar != null)
-            _healthFill.size = _healthBar.size;
+        //if (_healthFill != null && _healthBar != null)
+        //    _healthFill.size = _healthBar.size;
+
+        // --- LOGIC MỚI: ĐỒNG BỘ KÍCH THƯỚC ---
+        if (_healthFill != null)
+        {
+            //_healthFill.transform.localScale = Vector3.one;
+            _healthFill.transform.localScale = _healthFillBaseScale;
+            _healthFill.transform.localPosition = Vector3.zero;
+        }
 
         if (_activeBurnEffect != null)
         {
@@ -53,6 +75,8 @@ public class Enemy : MonoBehaviour
         if (_healthBar != null)
         {
             _healthBar.transform.position = transform.position + new Vector3(0, 0.5f, 0);
+
+            _healthBar.transform.position = transform.position + _healthBarOffset;
         }
 
         // --- LOGIC SÁT THƯƠNG THEO THỜI GIAN (DOT) ---
@@ -84,7 +108,6 @@ public class Enemy : MonoBehaviour
         }
         // ------------------------------------------------
     }
-
 
     public virtual void MoveToTarget()
     {
@@ -145,14 +168,22 @@ public class Enemy : MonoBehaviour
         if (_healthFill == null || _healthBar == null) return;
 
         float ratio = (float)_currentHealth / _maxHealth;
+        ratio = Mathf.Clamp01(ratio);
 
-        Vector2 size = _healthFill.size;
-        size.x = _healthBar.size.x * ratio;
-        _healthFill.size = size;
+        //Vector2 size = _healthFill.size;
+        //size.x = _healthBar.size.x * ratio;
+        //_healthFill.size = size;
 
-        Vector3 position = _healthFill.transform.localPosition;
-        position.x = _healthBar.size.x * (ratio - 1) / 2;
-        _healthFill.transform.localPosition = position;
+        //Vector3 position = _healthFill.transform.localPosition;
+        //position.x = _healthBar.size.x * (ratio - 1) / 2f;
+        //_healthFill.transform.localPosition = position;
+        //Vector3 scale = _healthFill.transform.localScale;
+        //scale.x = ratio;
+        //_healthFill.transform.localScale = scale;
+
+        Vector3 s = _healthFillBaseScale;
+        s.x *= ratio;
+        _healthFill.transform.localScale = s;
     }
 
     // --- LOGIC HIỆU ỨNG DOT ---

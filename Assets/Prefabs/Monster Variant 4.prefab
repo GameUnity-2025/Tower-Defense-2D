@@ -29,6 +29,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster Variant 4
       objectReference: {fileID: 0}
+    - target: {fileID: 3787561338081720296, guid: dae22a222eb903f49bfa1a89fb63e48e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.406
+      objectReference: {fileID: 0}
+    - target: {fileID: 3787561338081720296, guid: dae22a222eb903f49bfa1a89fb63e48e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.605
+      objectReference: {fileID: 0}
     - target: {fileID: 5721372215258040628, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: _maxHealth
@@ -42,22 +52,22 @@ PrefabInstance:
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.2289
+      value: 1.7902062
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.2361
+      value: 1.3575045
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.009
+      value: 0.004
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.017
+      value: -0.204
       objectReference: {fileID: 0}
     - target: {fileID: 6849599722303560875, guid: dae22a222eb903f49bfa1a89fb63e48e,
         type: 3}
@@ -146,7 +156,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.0053360164, y: -0.011936039}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -157,5 +167,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.75}
+  m_Size: {x: 0.5037531, y: 0.58289534}
   m_EdgeRadius: 0
